@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting OSIS - Pemilihan Ketua OSIS</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/2991/2991148.png">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <i class="fas fa-vote-yea"></i>
+                <h1>Voting OSIS</h1>
+            </div>
+            <div class="time-info">
+                <div id="current-time"></div>
+                <div id="voting-status" class="status-open">Voting Berlangsung</div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Login Section -->
+            <section id="login-section" class="card">
+                <h2><i class="fas fa-user-check"></i> Verifikasi NIS</h2>
+                <p>Masukkan Nomor Induk Siswa (NIS) Anda untuk memulai voting</p>
+                
+                <div class="input-group">
+                    <input type="text" id="nis-input" placeholder="Contoh: 12345" maxlength="20">
+                    <button id="verify-btn" class="btn-primary">
+                        <i class="fas fa-arrow-right"></i> Verifikasi
+                    </button>
+                </div>
+                
+                <div id="login-error" class="error-message"></div>
+                
+                <div class="info-box">
+                    <h3><i class="fas fa-info-circle"></i> Informasi Penting:</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> Satu NIS hanya dapat memilih satu kali</li>
+                        <li><i class="fas fa-check-circle"></i> Voting tidak dapat dibatalkan atau diubah</li>
+                        <li><i class="fas fa-check-circle"></i> Hasil akan ditampilkan secara real-time</li>
+                        <li><i class="fas fa-check-circle"></i> Pastikan NIS Anda benar</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Voting Section -->
+            <section id="voting-section" class="card hidden">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-friends"></i> Pilih Kandidat Ketua OSIS</h2>
+                    <div class="user-info">
+                        <span id="current-user"></span>
+                        <button id="logout-btn" class="btn-small">
+                            <i class="fas fa-sign-out-alt"></i> Ganti NIS
+                        </button>
+                    </div>
+                </div>
+                
+                <p class="instruction">Klik pada kartu kandidat untuk melihat visi-misi lengkap, lalu pilih dengan tombol "Pilih Kandidat Ini"</p>
+                
+                <div id="candidates-container" class="candidates-grid">
+                    <!-- Candidates will be loaded here -->
+                </div>
+                
+                <div id="selected-candidate" class="hidden">
+                    <h3><i class="fas fa-check-circle"></i> Kandidat Terpilih:</h3>
+                    <div id="selected-candidate-info"></div>
+                    <button id="confirm-vote-btn" class="btn-success">
+                        <i class="fas fa-paper-plane"></i> Konfirmasi Voting
+                    </button>
+                    <button id="change-selection-btn" class="btn-secondary">
+                        <i class="fas fa-undo"></i> Ganti Pilihan
+                    </button>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="results-section" class="card">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-bar"></i> Hasil Sementara</h2>
+                    <button id="refresh-results-btn" class="btn-small">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                
+                <div id="stats-container" class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="total-votes">0</div>
+                            <div class="stat-label">Total Suara</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="unique-voters">0</div>
+                            <div class="stat-label">Pemilih Unik</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="last-vote">-</div>
+                            <div class="stat-label">Vote Terakhir</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="results-container">
+                    <div class="loading" id="results-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Memuat hasil...
+                    </div>
+                    <div id="results-chart"></div>
+                </div>
+                
+                <div class="auto-refresh-info">
+                    <i class="fas fa-sync"></i> Hasil diperbarui setiap 30 detik
+                </div>
+            </section>
+
+            <!-- Success Modal -->
+            <div id="success-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-icon success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Vote Berhasil!</h2>
+                    <p>Terima kasih telah menggunakan hak pilih Anda. Vote telah tercatat dalam sistem.</p>
+                    <div class="modal-details">
+                        <p><strong>NIS:</strong> <span id="modal-nis"></span></p>
+                        <p><strong>Kandidat:</strong> <span id="modal-candidate"></span></p>
+                        <p><strong>Waktu:</strong> <span id="modal-time"></span></p>
+                    </div>
+                    <button id="modal-close-btn" class="btn-primary">
+                        <i class="fas fa-times"></i> Tutup
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><i class="fas fa-info-circle"></i> Informasi</h4>
+                    <p>Voting OSIS Tahun Ajaran 2024/2025</p>
+                    <p>Waktu: 08:00 - 15:00 WIB</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4><i class="fas fa-headset"></i> Bantuan</h4>
+                    <p>Jika mengalami kendala, hubungi:</p>
+                    <p>Panitia OSIS: 0812-3456-7890</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4><i class="fas fa-shield-alt"></i> Keamanan</h4>
+                    <p>Sistem ini menggunakan enkripsi untuk melindungi data Anda</p>
+                    <p>Satu NIS = Satu Suara</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Voting OSIS | <span id="server-status">Menghubungkan ke server...</span></p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <p>Memproses...</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
