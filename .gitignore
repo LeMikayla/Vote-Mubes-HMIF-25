@@ -1,0 +1,22 @@
+# Dependency directories (Backend & Frontend)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment variables (JANGAN UPLOAD PASSWORD)
+.env
+.env.local
+.env.production
+
+# Build output (React)
+dist/
+build/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
