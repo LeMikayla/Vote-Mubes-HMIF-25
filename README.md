@@ -1,55 +1,52 @@
-Web Vote MUBES 2025
+Web Vote Ketua Himpunan Informatika
 
-Web Vote MUBES 2025 adalah aplikasi berbasis web yang dikembangkan untuk mendukung pelaksanaan pemilihan ketua dan wakil ketua pada kegiatan Musyawarah Besar (MUBES) tahun 2025.
-Aplikasi ini bertujuan untuk mempermudah proses pemungutan suara sekaligus menjaga transparansi dan keakuratan hasil pemilihan.
+Web Vote Ketua Himpunan Informatika adalah aplikasi berbasis web yang dikembangkan untuk mendukung proses pemilihan Ketua Himpunan Mahasiswa Informatika secara online.
+Aplikasi ini bertujuan untuk mempermudah mahasiswa Informatika dalam memberikan hak suara serta membantu panitia dalam mengelola dan merekap hasil pemilihan secara lebih efektif dan transparan.
 
-Sistem ini memungkinkan mahasiswa memberikan suara secara online dengan mekanisme satu pemilih satu suara, serta membantu panitia dalam mengelola data pemilih dan hasil voting secara terpusat.
+Sistem voting dirancang dengan prinsip satu mahasiswa satu suara, sehingga proses pemilihan dapat berjalan dengan adil dan terkontrol.
 
 Fitur
 
-Login pemilih menggunakan akun yang telah terdaftar
+Autentikasi pemilih mahasiswa Informatika
 
-Tampilan daftar kandidat yang informatif
+Informasi kandidat ketua himpunan
 
 Proses voting yang sederhana dan aman
 
 Perhitungan suara otomatis
 
-Halaman admin untuk memantau hasil pemilihan
+Halaman admin untuk monitoring hasil pemilihan
 
 Tujuan Pengembangan
 
-Meningkatkan efisiensi pelaksanaan MUBES
+Mendukung digitalisasi pemilihan Ketua Himpunan
 
-Mengurangi kesalahan dan kecurangan dalam pemungutan suara
+Meningkatkan partisipasi mahasiswa Informatika
 
-Mempermudah rekapitulasi hasil pemilihan
+Mengurangi potensi kesalahan dan kecurangan
 
-Mendukung digitalisasi kegiatan organisasi mahasiswa
+Mempercepat proses penghitungan suara
 
-Teknologi
+Teknologi yang Digunakan
 
 Frontend: HTML, CSS, JavaScript
 
-Backend: (sesuaikan dengan proyek)
+Backend: (disesuaikan dengan kebutuhan proyek)
 
 Database: MySQL
 
-Version Control: GitHub
+Version Control: Git & GitHub
 
-Cara Menjalankan
+Cara Menjalankan Aplikasi
 
 Clone repository ini ke komputer lokal
 
-Lakukan konfigurasi database sesuai kebutuhan
+Konfigurasi database sesuai kebutuhan
 
 Jalankan server lokal
 
 Akses aplikasi melalui browser
 
-Catatan
+Penutup
 
-Proyek ini dibuat untuk keperluan akademik dan organisasi mahasiswa.
-Pengembangan lebih lanjut dapat dilakukan sesuai kebutuhan panitia MUBES.
-
-Kalau kamu mau, aku bisa:
+Aplikasi ini dikembangkan sebagai bagian dari kebutuhan organisasi dan pembelajaran, serta dapat dikembangkan lebih lanjut sesuai kebutuhan Himpunan Mahasiswa Informatika.
