@@ -1,4 +1,5 @@
 const UserModel = require('../models/userModel');
+const jwt = require('jsonwebtoken');
 
 class AuthController {
   
@@ -42,16 +43,19 @@ class AuthController {
       }
 
       // 7. Login Sukses!
-      // Kirim data user (kecuali password) ke frontend
-      return res.status(200).json({
-        success: true,
-        message: 'Login berhasil!',
-        data: {
-          id: user.id,
-          username: user.username,
-          hasVoted: user.has_voted
-        }
-      });
+        // GENERATE JWT
+        const token = jwt.sign(
+            { id: user.id, username: user.username }, // 
+            'KUNCI_RAHASIA_NEGARA',                   // Secret Key 
+            { expiresIn: '1h' }                       // Token hangus dalam 1 jam
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'Login berhasil!',
+            token: token, // Kirim token ke frontend
+            // Kita tidak perlu kirim ID lagi karena sudah ada di dalam token
+        });
 
     } catch (error) {
       console.error('Login Error:', error);

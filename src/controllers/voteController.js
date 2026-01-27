@@ -5,30 +5,30 @@ class VoteController {
   // 1. Submit Vote
   static async submitVote(req, res) {
     // Ambil data dari Body (dikirim oleh Frontend)
-    const { userId, candidateId } = req.body;
+    const userId = req.user.id;
+    const { candidateId } = req.body;
 
-    // A. Validasi Input Dasar
-    if (!userId || !candidateId) {
+    if (!candidateId) {
       return res.status(400).json({
         success: false,
-        message: 'Data tidak lengkap! User ID dan Candidate ID diperlukan.'
+        message: 'Candidate ID diperlukan.'
       });
     }
 
     try {
-      // B. Panggil Model
+    
       await VoteModel.createVote(userId, candidateId);
 
-      // C. Sukses
+      // Sukses
       return res.status(201).json({
         success: true,
         message: 'Suara Anda berhasil direkam!'
       });
 
     } catch (error) {
-      // D. Error Handling Khusus (Menerjemahkan Error Model ke HTTP Code)
+      
 
-      // Kasus 1: User sudah pernah milih
+      // User sudah pernah voting
       if (error.message.includes('Double Vote')) {
         return res.status(403).json({ // 403 = Forbidden
           success: false,
@@ -36,15 +36,9 @@ class VoteController {
         });
       }
 
-      // Kasus 2: User ID ga ada di database
-      if (error.message.includes('tidak ditemukan')) {
-        return res.status(404).json({ // 404 = Not Found
-          success: false,
-          message: 'Data pemilih tidak valid.'
-        });
-      }
+  
 
-      // Kasus 3: Error Server Lainnya (Database mati, syntax error, dll)
+      // Error dan lain lain
       console.error('Error submitting vote:', error);
       return res.status(500).json({ // 500 = Internal Server Error
         success: false,
@@ -53,9 +47,9 @@ class VoteController {
     }
   }
 
-  // 2. Cek Status (Apakah user ini sudah milih?)
+  // 2. Cek status voting
   static async checkVoteStatus(req, res) {
-    // Ambil ID dari URL (misal: /api/votes/check/1)
+    // Ambil ID dari URL 
     const { id } = req.params;
 
     try {
@@ -122,18 +116,15 @@ class VoteController {
   }
 
   // 5. Get Candidates (Khusus List Kandidat)
-  // *Catatan: Di routes kamu ada 'getCandidates', tapi di Model BELUM ADA.
-  // Kita bisa pakai 'getResults' tapi kita buang data jumlah suaranya (biar rahasia sebelum selesai)
   static async getCandidates(req, res) {
     try {
       const results = await VoteModel.getResults();
 
-      // Mapping: Kita cuma ambil info kandidat, HAPUS jumlah suaranya agar tidak bocor ke publik
+      // ingfo kandidat
       const candidatesOnly = results.map(item => ({
         id: item.id,
         name: item.name,
         vision: item.vision,
-        // total_votes: item.total_votes // <-- JANGAN dikirim kalau mau rahasia
       }));
 
       return res.status(200).json({
