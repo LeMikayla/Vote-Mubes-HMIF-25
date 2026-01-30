@@ -32,16 +32,16 @@ class AuthController {
       console.log('8. User Valid, Membuat Token...');
       // Pastikan JWT_SECRET ada isinya
       if (!process.env.JWT_SECRET) {
-        throw new Error('FATAL: JWT_SECRET belum di-set di .env!');
+         throw new Error('FATAL: JWT_SECRET belum di-set di .env!');
       }
 
       const token = jwt.sign(
-        { id: user.id, username: user.username, role: user.role },
-        process.env.JWT_SECRET,
+        { id: user.id, username: user.username, role: user.role }, 
+        process.env.JWT_SECRET, 
         { expiresIn: '1h' }
       );
 
-      console.log('9. Berhasil! Masuk');
+      console.log('9. Berhasil! Mengirim respon.');
       return res.status(200).json({
         success: true,
         message: 'Login berhasil!',
@@ -54,6 +54,41 @@ class AuthController {
       return res.status(500).json({ message: 'Server Error: ' + error.message });
     }
   }
+
+
+
+static async me(req, res) {
+  try {
+    const userDecoded = req.user;
+
+    if (!userDecoded) {
+      return res.status(401).json({ success: false, message: 'Kamu tidak diizinkan untuk melakukan ini!' });
+    }
+
+    // Ambil data TERBARU dari Database
+    const user = await UserModel.findById(userDecoded.id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
+    }
+
+    // Kirim data ke frontend 
+    return res.status(200).json({
+      success: true,
+      data: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        hasVoted: user.has_voted 
+      }
+    });
+
+  } catch (error) {
+    console.error('Error di /me:', error);
+    return res.status(500).json({ success: false, message: 'Server Error' });
+  }
 }
+}
+
 
 module.exports = AuthController;

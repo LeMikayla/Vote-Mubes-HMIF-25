@@ -11,6 +11,18 @@ class UserModel {
       throw error;
     }
   }
+
+
+
+  static async findById(id) {
+    try {
+      const query = 'SELECT * FROM voters WHERE id = $1';
+      const result = await pool.query(query, [id]);
+      return result.rows[0];
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = UserModel;

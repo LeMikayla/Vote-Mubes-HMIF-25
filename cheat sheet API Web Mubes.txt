@@ -1,0 +1,33 @@
+- Cek Health 
+	http://localhost:3000/health
+
+- Cek Daftar Kandidat
+	http://localhost:3000/api/votes/candidates
+
+- Cek Login (username & password)
+	http://localhost:3000/api/auth/login
+	{
+	 "username": "",
+	 "password": ""
+	}
+
+- Cek Voting (candidate id)
+	http://localhost:3000/api/votes/submit
+	{ 
+	 "candidateId": 
+	}
+
+- Cek Hasil
+	http://localhost:3000/api/votes/results
+	http://localhost:3000/api/votes/statistics
+
+- CRUD
+	http://localhost:3000/api/candidates (POST)
+	http://localhost:3000/api/candidates/1 (PUT) <-- update
+	{
+  "name": "",
+  "vision": "",
+  "mission": "",
+  "image_url": ""
+}
+	http://localhost:3000/api/candidates/1 (DELETE) <-- 1 adalah id kandidat
