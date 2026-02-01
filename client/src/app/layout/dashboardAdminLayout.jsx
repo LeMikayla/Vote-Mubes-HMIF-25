@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { socket } from "../../../lib/socket";
 
-export default function dashboardAdminLayout({ children }) {
+export default function DashboardAdminLayout({ children }) {
   useEffect(() => {
     socket.connect();
 

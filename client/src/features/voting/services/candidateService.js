@@ -1,13 +1,13 @@
-import api from "../../../lib/api";
+import Api from "../../../lib/api";
 
 export const candidateService = {
   getAllCandidates: async () => {
-    const response = await api.get("/candidates");
+    const response = await Api.get("/candidates");
     return response.data;
   },
 
   getCandidateById: async (id) => {
-    const response = await api.get(`/candidates/${id}`);
+    const response = await Api.get(`/candidates/${id}`);
     return response.data;
   },
 };

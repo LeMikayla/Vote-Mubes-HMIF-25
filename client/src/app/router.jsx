@@ -1,21 +1,20 @@
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "../features/auth/components/protectedRoute";
 
-import dashboardAdminLayout from "./layouts/dashboardAdmin.jsx";
-import mainLayout from "./layouts/mainLayout.jsx";
-import authLayout from "./layouts/authLayout.jsx";
+import DashboardAdminLayout from "./layouts/DashboardAdmin.jsx";
+import MainLayout from "./layouts/MainLayout.jsx";
+import AuthLayout from "./layouts/AuthLayout.jsx";
 
-import login from "../features/auth/pages/login.jsx";
-import dashboardAdmin from "../features/admin/pages/dashboardAdmin.jsx";
-import voting from "../features/voting/pages/voting.jsx";
-import result from "../features/results/pages/result.jsx";
-import voterAdmin from "../features/admin/pages/voterAdmin.jsx";
+import Login from "../features/auth/pages/login.jsx";
+import DashboardAdmin from "../features/admin/pages/dashboardAdmin.jsx";
+import Voting from "../features/voting/pages/voting.jsx";
+import Result from "../features/results/pages/result.jsx";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <authLayout />,
-    children: [{ path: "login", element: <login /> }],
+    element: <AuthLayout />,
+    children: [{ path: "login", element: <Login /> }],
   },
 
   {
@@ -23,10 +22,10 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <mainLayout />,
+        element: <MainLayout />,
         children: [
-          { path: "vote", element: <voting /> },
-          { path: "results", element: <result /> },
+          { path: "vote", element: <Voting /> },
+          { path: "results", element: <Result /> },
         ],
       },
     ],
@@ -37,11 +36,8 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/admin",
-        element: <dashboardAdminLayout />,
-        children: [
-          { path: "dashboardAdmin", element: <dashboardAdmin /> },
-          { path: "voterAdmin", element: <voterAdmin /> },
-        ],
+        element: <DashboardAdminLayout />,
+        children: [{ path: "dashboardAdmin", element: <DashboardAdmin /> }],
       },
     ],
   },
