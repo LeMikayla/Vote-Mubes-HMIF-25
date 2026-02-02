@@ -35,13 +35,24 @@ Api.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
-      const res = await Api.post("/refresh");
-      const newToken = res.data.token;
+      try {
+        const oldToken = localStorage.getItem("token");
 
-      localStorage.setItem("token", newToken);
-      originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        const res = await Api.post("/auth/refresh-token", {
+          token: oldToken,
+        });
+        const newToken = res.data.token;
 
-      return Api(originalRequest);
+        localStorage.setItem("token", newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+
+        return Api(originalRequest);
+      } catch (refreshError) {
+        console.error("Session habis, silakan login kembali.");
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
+      }
     }
 
     if (error.response && error.response.status === 403) {

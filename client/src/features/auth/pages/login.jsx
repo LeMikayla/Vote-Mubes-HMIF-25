@@ -1,25 +1,12 @@
-import { useState } from "react";
+"use client";
+import LoginForm from "../components/loginForm.jsx";
 
-function Login() {
-  const [count, setCount] = useState(0);
-
+const Login = () => {
   return (
     <>
-      <h1>Vite + React</h1>
-      <div className="">
-        <button
-          className="border-3"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="">Click on the Vite and React logos to learn more</p>
+      <LoginForm />
     </>
   );
-}
+};
 
 export default Login;

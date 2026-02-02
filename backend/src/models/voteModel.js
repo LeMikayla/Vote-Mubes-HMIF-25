@@ -1,50 +1,76 @@
-const db = require('../config/database');
-const logger = require('../config/logger');
+const pool = require('../config/database')
+// const logger = require('../config/logger');  Nyalakan jika sudah ada setup logger
 
 class VoteModel {
-  // Submit vote baru
-  static async createVote(nis, candidateId, ipAddress = null) {
+
+  // Submit Vote
+  static async createVote(voterId, candidateId) {
+    const client = await pool.connect(); 
+
     try {
-      const query = `
-        INSERT INTO votes (nis, candidate_id, ip_address) 
-        VALUES ($1, $2, $3) 
-        RETURNING id, nis, candidate_id, voted_at
-      `;
-      const values = [nis, candidateId, ipAddress];
-      
-      const result = await db.query(query, values);
-      logger.info(`Vote created: NIS=${nis}, Candidate=${candidateId}`);
-      return result.rows[0];
-    } catch (error) {
-      if (error.code === '23505') { // Unique violation
-        throw new Error('NIS sudah melakukan voting');
+      await client.query('BEGIN'); 
+
+      // Cek apakah user sudah voting 
+      const checkVoter = await client.query(
+        'SELECT has_voted FROM voters WHERE id = $1 FOR UPDATE',
+        [voterId]
+      );
+
+      if (checkVoter.rows.length === 0) {
+        throw new Error('Voter tidak ditemukan');
       }
-      logger.error('Error creating vote:', error);
+
+      if (checkVoter.rows[0].has_voted) {
+        throw new Error('Anda sudah menggunakan hak suara (Double Vote Detected)');
+      }
+
+      // Masukkan Suara 
+      await client.query(
+        'INSERT INTO votes (candidate_id) VALUES ($1)',
+        [candidateId]
+      );
+
+      // Update status 
+      await client.query(
+        'UPDATE voters SET has_voted = TRUE, voted_at = NOW() WHERE id = $1',
+        [voterId]
+      );
+
+      await client.query('COMMIT'); 
+
+     
+      return { success: true };
+
+    } catch (error) {
+      await client.query('ROLLBACK'); // Batalkan semua jika ada error
+      
       throw error;
+    } finally {
+      client.release(); 
     }
   }
 
-  // Cek apakah NIM sudah voting
-  static async checkVote(nis) {
+  // Cek status vting user
+  static async checkVoteStatus(voterId) {
     try {
-      const query = 'SELECT id, candidate_id, voted_at FROM votes WHERE nis = $1';
-      const result = await db.query(query, [nis]);
+      const query = 'SELECT has_voted, voted_at FROM voters WHERE id = $1';
+      const result = await pool.query(query, [voterId]);
       return result.rows[0];
     } catch (error) {
-      logger.error('Error checking vote:', error);
+    
       throw error;
     }
   }
 
-  // Get hasil voting
+  // Get Hasil
   static async getResults() {
     try {
       const query = `
         SELECT 
           c.id,
           c.name,
-          c.class,
           c.vision,
+          c.image_url,
           COUNT(v.id) as total_votes,
           ROUND(
             COUNT(v.id) * 100.0 / NULLIF((SELECT COUNT(*) FROM votes), 0), 
@@ -52,45 +78,31 @@ class VoteModel {
           ) as percentage
         FROM candidates c
         LEFT JOIN votes v ON c.id = v.candidate_id
-        GROUP BY c.id, c.name, c.class, c.vision
-        ORDER BY total_votes DESC, c.name
+        GROUP BY c.id, c.name, c.vision, c.image_url
+        ORDER BY total_votes DESC
       `;
-      const result = await db.query(query);
+      const result = await pool.query(query);
       return result.rows;
     } catch (error) {
-      logger.error('Error getting results:', error);
+      // logger.error('Error getting results:', error);
       throw error;
     }
   }
 
-  // Get statistik voting
-  static async getStats() {
+  // Get Statisti
+  static async getStatistics() {
     try {
+     
       const query = `
         SELECT 
-          COUNT(*) as total_votes,
-          COUNT(DISTINCT nis) as unique_voters,
-          MIN(voted_at) as first_vote,
-          MAX(voted_at) as last_vote,
-          COUNT(DISTINCT candidate_id) as candidates_voted
-        FROM votes
-      `;
-      const result = await db.query(query);
+          (SELECT COUNT(*) FROM votes) as total_suara_masuk,
+          (SELECT COUNT(*) FROM voters WHERE has_voted = TRUE) as total_pemilih_berpartisipasi,
+          (SELECT COUNT(*) FROM voters) as total_daftar_pemilih_tetap
+        `;
+      const result = await pool.query(query);
       return result.rows[0];
     } catch (error) {
-      logger.error('Error getting stats:', error);
-      throw error;
-    }
-  }
-
-  // Reset votes (hanya untuk testing/atmin lok ya)
-  static async resetVotes() {
-    try {
-      await db.query('TRUNCATE votes RESTART IDENTITY');
-      logger.warn('All votes have been reset');
-      return { message: 'Votes reset successfully' };
-    } catch (error) {
-      logger.error('Error resetting votes:', error);
+      
       throw error;
     }
   }

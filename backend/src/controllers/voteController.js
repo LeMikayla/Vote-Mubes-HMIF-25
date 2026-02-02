@@ -1,156 +1,140 @@
-const VoteModel = require('../models/voteModel');
-const CandidateModel = require('../models/candidateModel');
-const logger = require('../config/logger');
+const UserModel = require("../models/userModel");
+const VoteModel = require("../models/voteModel");
 
 class VoteController {
-  // Submit vote
+  // 1. Submit Vote
   static async submitVote(req, res) {
-    try {
-      const { nis, candidateId } = req.body;
-      const ipAddress = req.ip;
+    // Ambil data dari Body (dikirim oleh Frontend)
+    const userId = req.user.id;
+    const { candidateId } = req.body;
 
-      // Validasi input
-      if (!nis || !candidateId) {
-        return res.status(400).json({
-          success: false,
-          error: 'NIM dan ID kandidat harus diisi'
-        });
-      }
-
-      // Validasi format NIM (minimal 5 digit)
-      if (!/^\d{5,}$/.test(nis)) {
-        return res.status(400).json({
-          success: false,
-          error: 'Format NIM tidak valid (minimal 5 digit angka)'
-        });
-      }
-
-      // Cek apakah kandidat valid
-      const candidate = await CandidateModel.getById(candidateId);
-      if (!candidate) {
-        return res.status(400).json({
-          success: false,
-          error: 'Kandidat tidak ditemukan'
-        });
-      }
-
-      // Submit vote
-      const vote = await VoteModel.createVote(nis, candidateId, ipAddress);
-      
-      logger.info(`Vote submitted successfully: NIM=${nis}`);
-      
-      return res.status(201).json({
-        success: true,
-        message: 'Vote berhasil disimpan!',
-        data: {
-          voteId: vote.id,
-          nis: vote.nis,
-          candidateId: vote.candidate_id,
-          votedAt: vote.voted_at
-        }
+    if (!candidateId) {
+      return res.status(400).json({
+        success: false,
+        message: "Kandidat harus dipilih!",
       });
-      
+    }
+
+    try {
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User tidak ditemukan" });
+      }
+
+      if (user.has_voted) {
+        return res
+          .status(400)
+          .json({ message: "Anda sudah menggunakan hak suara." });
+      }
+
+      await VoteModel.createVote(userId, candidateId);
+      await UserModel.markAsVoted(userId);
+
+      const updatedResults = await VoteModel.getResults();
+      const updatedStats = await VoteModel.getStatistics();
+
+      req.io.emit("vote_update", {
+        results: updatedResults,
+        statistics: updatedStats,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Suara berhasil direkam",
+      });
     } catch (error) {
-      logger.error('Submit vote error:', error);
-      
-      if (error.message === 'NIM ini sudah melakukan voting') {
-        return res.status(409).json({
+      console.error("Vote Error:", error);
+      return res
+        .status(500)
+        .json({ message: "Terjadi kesalahan saat menyimpan suara." });
+    }
+  }
+
+  // 2. Cek status voting
+  static async checkVoteStatus(req, res) {
+    // Ambil ID dari URL
+    const { id } = req.params;
+
+    try {
+      const data = await VoteModel.checkVoteStatus(id);
+
+      if (!data) {
+        return res.status(404).json({
           success: false,
-          error: 'NIM ini sudah melakukan voting sebelumnya'
+          message: "User tidak ditemukan",
         });
       }
-      
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          hasVoted: data.has_voted,
+          votedAt: data.voted_at, // Bisa null jika belum milih
+        },
+      });
+    } catch (error) {
+      console.error("Error checking status:", error);
       return res.status(500).json({
         success: false,
-        error: 'Terjadi kesalahan server. Silakan coba lagi.'
+        message: "Gagal mengecek status pemilih",
       });
     }
   }
 
-  // Get hasil voting
+  // 3. Get Hasil Voting (Quick Count)
   static async getResults(req, res) {
     try {
       const results = await VoteModel.getResults();
-      const stats = await VoteModel.getStats();
-      
-      return res.json({
+
+      return res.status(200).json({
         success: true,
-        data: {
-          results,
-          statistics: stats
-        },
-        timestamp: new Date().toISOString()
+        data: results,
       });
     } catch (error) {
-      logger.error('Get results error:', error);
+      console.error("Error fetching results:", error);
       return res.status(500).json({
         success: false,
-        error: 'Gagal mengambil hasil voting'
+        message: "Gagal mengambil data hasil voting",
       });
     }
   }
 
-  // Get statistik
+  // 4. Get Statistik
   static async getStatistics(req, res) {
     try {
-      const stats = await VoteModel.getStats();
-      return res.json({
+      const stats = await VoteModel.getStatistics();
+
+      return res.status(200).json({
         success: true,
-        data: stats
+        data: stats,
       });
     } catch (error) {
-      logger.error('Get statistics error:', error);
+      console.error("Error fetching stats:", error);
       return res.status(500).json({
         success: false,
-        error: 'Gagal mengambil statistik'
+        message: "Gagal mengambil data statistik",
       });
     }
   }
 
-  // Check vote status by NIS
-  static async checkVoteStatus(req, res) {
-    try {
-      const { nis } = req.params;
-      
-      if (!nis) {
-        return res.status(400).json({
-          success: false,
-          error: 'NIM harus disertakan'
-        });
-      }
-
-      const vote = await VoteModel.checkVote(nis);
-      
-      return res.json({
-        success: true,
-        data: {
-          hasVoted: !!vote,
-          voteDetails: vote || null
-        }
-      });
-    } catch (error) {
-      logger.error('Check vote status error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Gagal memeriksa status voting'
-      });
-    }
-  }
-
-  // Get semua kandidat
+  // 5. Get Candidates (Khusus List Kandidat)
   static async getCandidates(req, res) {
     try {
-      const candidates = await CandidateModel.getAll();
-      return res.json({
+      const results = await VoteModel.getResults();
+
+      // ingfo kandidat
+      const candidatesOnly = results.map((item) => ({
+        id: item.id,
+        name: item.name,
+        vision: item.vision,
+      }));
+
+      return res.status(200).json({
         success: true,
-        data: candidates
+        data: candidatesOnly,
       });
     } catch (error) {
-      logger.error('Get candidates error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Gagal mengambil data kandidat'
-      });
+      return res.status(500).json({ message: "Gagal mengambil data kandidat" });
     }
   }
 }

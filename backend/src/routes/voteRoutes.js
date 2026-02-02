@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const VoteController = require('../controllers/voteController');
+const verifyToken = require('../middleware/authMiddleware');
+
 const { voteLimiter, resultsLimiter, apiLimiter } = require('../middleware/rateLimiter');
 
 // Public routes
@@ -9,7 +11,12 @@ router.get('/results', resultsLimiter, VoteController.getResults);
 router.get('/statistics', apiLimiter, VoteController.getStatistics);
 router.get('/check/:nis', apiLimiter, VoteController.checkVoteStatus);
 
-// Voting endpoint dengan rate limiting ketat
-router.post('/submit', voteLimiter, VoteController.submitVote);
+
+router.post('/submit', verifyToken, VoteController.submitVote);
+
+// Cek status juga perlu diproteksi
+router.get('/check', verifyToken, VoteController.checkVoteStatus);
+
+
 
 module.exports = router;

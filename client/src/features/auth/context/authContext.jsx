@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { authService } from "../services/authService";
+import Loader from "../../shared/components/loader.jsx";
 
 export const AuthContext = createContext();
 
@@ -8,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const checkAuth = async () => {
     const storedToken = localStorage.getItem("token");
@@ -23,7 +25,7 @@ export const AuthProvider = ({ children }) => {
         logout();
       }
     }
-    setLoading(false);
+    setIsInitialized(true);
   };
 
   const login = async (username, password) => {
@@ -37,7 +39,7 @@ export const AuthProvider = ({ children }) => {
       setRole(userData.role);
       localStorage.setItem("token", newToken);
 
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       return {
         success: false,
@@ -59,6 +61,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     checkAuth();
   }, []);
+
+  if (!isInitialized) {
+    return <Loader />;
+  }
 
   return (
     <AuthContext.Provider

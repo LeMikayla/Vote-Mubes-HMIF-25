@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { candidateService } from "../../voting/services/candidateService";
 import { adminService } from "../services/adminService";
-import DefaultAvatar from "../../../assets/images/avatar_placeholder.png";
-import Loader from "../../../shared/components/Loader.jsx";
+import Loader from "../../../shared/components/loader.jsx";
 
 export default function DaftarCalon({ onTambah, onEdit }) {
   const [data, setData] = useState([]);
@@ -25,6 +24,10 @@ export default function DaftarCalon({ onTambah, onEdit }) {
     fetchData();
   }, []);
 
+  const getUiAvatar = (name) => {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=128`;
+  };
+
   const hapus = async (id) => {
     if (!confirm("Yakin ingin menghapus calon ini?")) return;
 
@@ -37,8 +40,9 @@ export default function DaftarCalon({ onTambah, onEdit }) {
     }
   };
 
-  const handleImageError = (e) => {
-    e.target.src = DefaultAvatar;
+  const handleImageError = (e, name) => {
+    e.targeet.oneerror = null;
+    e.target.src = getUiAvatar(name);
   };
 
   return (
@@ -67,9 +71,9 @@ export default function DaftarCalon({ onTambah, onEdit }) {
             >
               {c.foto && (
                 <img
-                  src={c.foto ? c.foto : DefaultAvatar}
+                  src={c.foto ? c.foto : getUiAvatar(c.nama)}
                   alt={c.nama}
-                  onError={handleImageError}
+                  onError={(e) => handleImageError(e, c.nama)}
                   className="w-22.5 h-22.5 rounded-full object-cover border-2 border-gray-200"
                 />
               )}

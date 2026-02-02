@@ -37,7 +37,13 @@ export const router = createBrowserRouter([
       {
         path: "/admin",
         element: <DashboardAdminLayout />,
-        children: [{ path: "dashboardAdmin", element: <DashboardAdmin /> }],
+        children: [
+          {
+            index: true,
+            element: <Navigate to="candidates" replace />,
+          },
+          { path: "dashboardAdmin", element: <DashboardAdmin /> },
+        ],
       },
     ],
   },
