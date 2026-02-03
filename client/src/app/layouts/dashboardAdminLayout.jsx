@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { socket } from "../../lib/socket";
+import AdminNavbar from "../../features/admin/components/adminNavbar";
 
 export default function DashboardAdminLayout({}) {
   useEffect(() => {

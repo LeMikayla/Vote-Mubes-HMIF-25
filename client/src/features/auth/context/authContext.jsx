@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // ✅ FIX: Use getMe() to validate existing token
   const checkAuth = async () => {
     const storedToken = localStorage.getItem("token");
 
@@ -22,10 +23,16 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
+      // ✅ Call /auth/me to get user data
       const response = await authService.getMe();
-      setUser(response.user);
-      setRole(response.user.role);
-      setToken(storedToken);
+
+      if (response.success && response.user) {
+        setUser(response.user);
+        setRole(response.user.role);
+        setToken(storedToken);
+      } else {
+        throw new Error("Invalid response from server");
+      }
     } catch (error) {
       console.error("Token invalid/expired:", error);
       toast.error("Sesi telah berakhir. Silakan login kembali.");
@@ -36,22 +43,40 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // ✅ FIX: Handle backend response structure correctly
   const login = async (username, password) => {
     setLoading(true);
     try {
       const response = await authService.login(username, password);
-      const { token: newToken, user: userData } = response;
 
-      setToken(newToken);
-      setUser(userData);
-      setRole(userData.role);
-      localStorage.setItem("token", newToken);
+      // ✅ Backend now returns: { success, message, token, user }
+      if (response.success && response.token && response.user) {
+        const newToken = response.token;
+        const userData = response.user;
 
-      return { success: true, user: userData };
+        // Store everything
+        localStorage.setItem("token", newToken);
+        setToken(newToken);
+        setUser(userData);
+        setRole(userData.role);
+
+        return {
+          success: true,
+          user: userData,
+          role: userData.role,
+        };
+      } else {
+        return {
+          success: false,
+          message: response.message || "Login gagal",
+        };
+      }
     } catch (error) {
+      console.error("Login error:", error);
       return {
         success: false,
-        error: error.response?.data?.message || "Login gagal",
+        message:
+          error.response?.data?.message || error.message || "Login gagal",
       };
     } finally {
       setLoading(false);

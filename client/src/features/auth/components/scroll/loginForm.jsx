@@ -26,10 +26,12 @@ const LoginForm = () => {
       toast.error("NPM dan kata sandi wajib diisi.");
       return;
     }
+
     const result = await login(formData.npm, formData.password);
 
     if (result.success) {
-      const userRole = result.user?.role;
+      // ✅ FIX: Use result.role instead of result.user?.role
+      const userRole = result.role;
 
       if (userRole === "admin") {
         toast.success("Login berhasil! Selamat datang Admin.");
@@ -39,6 +41,7 @@ const LoginForm = () => {
         navigate("/votes");
       }
     } else {
+      // ✅ FIX: Show the actual error message from backend
       toast.error(result.message || "Gagal login. Silakan coba lagi.");
     }
   };
@@ -53,11 +56,10 @@ const LoginForm = () => {
         <RomanInput
           iconSrc={Username}
           placeholder="Masukkan NPM kamu"
-          // Props penting agar bisa diketik:
           name="npm"
           value={formData.npm}
           onChange={handleChange}
-          disabled={loading} // Matikan input saat loading
+          disabled={loading}
         />
       </div>
 
@@ -66,13 +68,11 @@ const LoginForm = () => {
         <RomanInput
           iconSrc={Password}
           placeholder="Masukkan kata sandi"
-          // Props penting agar bisa diketik:
           name="password"
           value={formData.password}
           onChange={handleChange}
           disabled={loading}
-          type={showPassword ? "text" : "password"} // Toggle text/password
-          // Tombol Mata (Show/Hide)
+          type={showPassword ? "text" : "password"}
           rightElement={
             <button
               type="button"
@@ -89,14 +89,13 @@ const LoginForm = () => {
       <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-30">
         <button
           type="submit"
-          disabled={loading} // Cegah klik ganda
+          disabled={loading}
           className="relative w-19.5 h-19.5 rounded-full cursor-pointer transition-transform hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
           style={{
             background: "#9D1016",
             boxShadow: "0 6px 0 #762125, 0 8px 12px rgba(0,0,0,0.3)",
           }}
         >
-          {/* Hiasan Shine pada tombol */}
           <div
             className="absolute inset-1 rounded-full pointer-events-none"
             style={{
@@ -108,7 +107,6 @@ const LoginForm = () => {
             }}
           />
 
-          {/* Teks Tombol (Berubah jadi '...' saat loading) */}
           <span
             className="absolute inset-0 flex items-center justify-center text-white font-serif text-sm tracking-wider"
             style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}

@@ -4,33 +4,41 @@ const jwt = require("jsonwebtoken");
 
 class AuthController {
   static async login(req, res) {
-    console.log("1. Request Login Masuk:", req.body); // <-- Cek Input
+    console.log("1. Request Login Masuk:", req.body);
 
     const { username, password } = req.body;
 
     if (!username || !password) {
       console.log("2. Gagal: Input Kosong");
-      return res.status(400).json({ message: "Username/Password kosong" });
+      return res.status(400).json({ 
+        success: false,
+        message: "Username/Password kosong" 
+      });
     }
 
     try {
       console.log("3. Mencari user di Database...");
       const user = await UserModel.findByUsername(username);
-      console.log("4. Hasil Database:", user); // <-- Apakah user ketemu?
+      console.log("4. Hasil Database:", user);
 
       if (!user) {
         console.log("5. Gagal: User tidak ditemukan");
-        return res.status(401).json({ message: "User tidak ditemukan" });
+        return res.status(401).json({ 
+          success: false,
+          message: "User tidak ditemukan" 
+        });
       }
 
       console.log("6. Cek Password...");
       if (user.password !== password) {
         console.log("7. Gagal: Password Salah");
-        return res.status(401).json({ message: "Password salah" });
+        return res.status(401).json({ 
+          success: false,
+          message: "Password salah" 
+        });
       }
 
       console.log("8. User Valid, Membuat Token...");
-      // Pastikan JWT_SECRET ada isinya
       if (!process.env.JWT_SECRET) {
         throw new Error("FATAL: JWT_SECRET belum di-set di .env!");
       }
@@ -42,17 +50,25 @@ class AuthController {
       );
 
       console.log("9. Berhasil! Mengirim respon.");
+      
+      // ✅ FIX: Return consistent response with user object
       return res.status(200).json({
         success: true,
         message: "Login berhasil!",
         token: token,
-        role: user.role,
+        user: {
+          id: user.id,
+          username: user.username,
+          role: user.role,
+          hasVoted: user.has_voted,
+        }
       });
     } catch (error) {
-      console.error("ERROR PARAH DI LOGIN:", error); // <-- Lihat error aslinya
-      return res
-        .status(500)
-        .json({ message: "Server Error: " + error.message });
+      console.error("ERROR PARAH DI LOGIN:", error);
+      return res.status(500).json({ 
+        success: false,
+        message: "Server Error: " + error.message 
+      });
     }
   }
 
@@ -71,15 +87,16 @@ class AuthController {
       const user = await UserModel.findById(userDecoded.id);
 
       if (!user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "User tidak ditemukan" });
+        return res.status(404).json({ 
+          success: false, 
+          message: "User tidak ditemukan" 
+        });
       }
 
       // Kirim data ke frontend
       return res.status(200).json({
         success: true,
-        data: {
+        user: {
           id: user.id,
           username: user.username,
           role: user.role,
@@ -88,7 +105,10 @@ class AuthController {
       });
     } catch (error) {
       console.error("Error di /me:", error);
-      return res.status(500).json({ success: false, message: "Server Error" });
+      return res.status(500).json({ 
+        success: false, 
+        message: "Server Error" 
+      });
     }
   }
 
@@ -97,7 +117,10 @@ class AuthController {
       const { token } = req.body;
 
       if (!token) {
-        return res.status(401).json({ message: "Token diperlukan" });
+        return res.status(401).json({ 
+          success: false,
+          message: "Token diperlukan" 
+        });
       }
 
       jwt.verify(
@@ -106,18 +129,21 @@ class AuthController {
         { ignoreExpiration: true },
         (err, decoded) => {
           if (err) {
-            return res.status(403).json({ message: "Token tidak valid" });
+            return res.status(403).json({ 
+              success: false,
+              message: "Token tidak valid" 
+            });
           }
 
-          // 3. Hapus data 'iat' (issued at) & 'exp' lama agar tidak konflik saat sign ulang
+          // Hapus data 'iat' & 'exp' lama
           const { iat, exp, ...userData } = decoded;
 
-          // 4. Buat Token Baru
+          // Buat Token Baru
           const newToken = jwt.sign(userData, process.env.JWT_SECRET, {
-            expiresIn: "1h", // Perpanjang 1 jam lagi
+            expiresIn: "1h",
           });
 
-          // 5. Kirim ke Frontend
+          // Kirim ke Frontend
           return res.status(200).json({
             success: true,
             token: newToken,
@@ -126,7 +152,10 @@ class AuthController {
       );
     } catch (error) {
       console.error("Refresh Error:", error);
-      return res.status(500).json({ message: "Gagal refresh token" });
+      return res.status(500).json({ 
+        success: false,
+        message: "Gagal refresh token" 
+      });
     }
   }
 }

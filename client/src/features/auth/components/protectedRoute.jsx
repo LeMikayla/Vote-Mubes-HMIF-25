@@ -4,6 +4,7 @@ import Loader from "../../../shared/components/loader.jsx";
 
 const ProtectedRoute = ({ allowedRoles = [] }) => {
   const { user, token, loading } = useAuth();
+  console.log({ user, token, loading });
   const location = useLocation();
 
   if (loading) {
