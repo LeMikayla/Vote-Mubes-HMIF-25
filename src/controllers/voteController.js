@@ -19,11 +19,24 @@ class VoteController {
     
       await VoteModel.createVote(userId, candidateId);
 
+      const queryRekap = `
+        SELECT c.id, c.name, COUNT(v.id) as total_votes
+        FROM candidates c
+        LEFT JOIN votes v ON c.id = v.candidate_id
+        GROUP BY c.id ORDER BY c.id ASC
+      `;
+
+      const pool = require('../config/database');
+      const result = await pool.query(queryRekap);
+
+      req.io.emit('vote_update', result.rows);
       // Sukses
       return res.status(201).json({
         success: true,
-        message: 'Suara Anda berhasil direkam!'
+        message: 'Suara berhasil masuk & Live Count terupdate!'
       });
+
+
 
     } catch (error) {
       

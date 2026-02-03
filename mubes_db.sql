@@ -41,16 +41,19 @@ INSERT INTO candidates (name, vision, mission, image_url) VALUES
 
 -- B. Masukkan Pemilih (Password: 12345)
 INSERT INTO voters (username, password, role, has_voted, voted_at) VALUES
-('mhs_test_01', '12345', FALSE, 'user', NULL),  -- Akun untuk tes SUKSES
-('mhs_test_02', '12345', FALSE, 'user', NULL),
-('mhs_test_03', '12345', TRUE, 'user', NOW());    -- Akun untuk tes GAGAL (sudah milih)
+('mhs_test_01', '12345', 'user', FALSE, NULL),  -- Akun untuk tes SUKSES
+('mhs_test_02', '12345', 'user', FALSE,  NULL),
+('mhs_test_03', '12345', 'user', TRUE, NOW());    -- Akun untuk tes GAGAL (sudah milih)
+
+
+-- Generate pemilih untuk test k9
+INSERT INTO voters (username, password, role, has_voted)
+SELECT 'user' || generate_series(1, 100), '12345', 'user', false;
 
 -- C. Masukkan Suara Awal (Biar grafik gak kosong)
 -- Karena user 03 sudah milih, kita kasih 1 suara ke Naruto (ID 2)
 INSERT INTO votes (candidate_id) VALUES (2);
 
--- Role default = user
-ALTER TABLE voters ADD COLUMN role VARCHAR(20) DEFAULT 'user';
 
 -- Akun Atmin cik
 INSERT INTO voters (username, password, role, has_voted) 
