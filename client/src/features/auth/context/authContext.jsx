@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { authService } from "../services/authService";
-import Loader from "../../shared/components/loader.jsx";
+import Loader from "../../../shared/components/loader.jsx";
+import { toast } from "sonner";
 
 export const AuthContext = createContext();
 
@@ -22,6 +23,7 @@ export const AuthProvider = ({ children }) => {
         setToken(storedToken);
       } catch (error) {
         console.error("Token invalid/expired:", error);
+        toast.error("Sesi telah berakhir. Silakan login kembali.");
         logout();
       }
     }
@@ -62,7 +64,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  if (!isInitialized) {
+  if (loading || !isInitialized) {
     return <Loader />;
   }
 

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { candidateService } from "../../voting/services/candidateService";
-import { adminService } from "../services/adminService";
+import { adminServices } from "../services/adminServices";
 import Loader from "../../../shared/components/loader.jsx";
+import { toast } from "sonner";
 
 export default function DaftarCalon({ onTambah, onEdit }) {
   const [data, setData] = useState([]);
@@ -14,7 +15,7 @@ export default function DaftarCalon({ onTambah, onEdit }) {
       setData(responses.data || responses);
     } catch (error) {
       console.error("Gagal mengambil data:", error);
-      // tambahkan toast
+      toast.error("Gagal mengambil data calon.");
     } finally {
       setLoading(false);
     }
@@ -36,7 +37,7 @@ export default function DaftarCalon({ onTambah, onEdit }) {
       fetchData();
     } catch (error) {
       console.error("Gagal menghapus data:", error);
-      // tambahkan toast
+      toast.error("Gagal menghapus data calon.");
     }
   };
 
@@ -44,6 +45,10 @@ export default function DaftarCalon({ onTambah, onEdit }) {
     e.targeet.oneerror = null;
     e.target.src = getUiAvatar(name);
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-6">

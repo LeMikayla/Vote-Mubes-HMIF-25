@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminServices } from "../services/adminServices";
+import { toast } from "sonner";
 
 export default function FormCalon({ calon, onBack }) {
   const [form, setForm] = useState({
@@ -57,7 +58,7 @@ export default function FormCalon({ calon, onBack }) {
       onBack();
     } catch (error) {
       console.error("Gagal menyimpan data:", error);
-      // tambahkan toast
+      toast.error("Gagal menyimpan data calon.");
     } finally {
       setSubmitting(false);
     }

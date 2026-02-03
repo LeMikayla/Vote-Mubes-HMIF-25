@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "sonner";
 
 const Api = axios.create({
   baseURL: import.meta.env.VITE_Api_BASE_URL,
@@ -49,6 +50,7 @@ Api.interceptors.response.use(
         return Api(originalRequest);
       } catch (refreshError) {
         console.error("Session habis, silakan login kembali.");
+        toast.error("Session habis, silakan login kembali.");
         localStorage.removeItem("token");
         window.location.href = "/login";
         return Promise.reject(refreshError);
@@ -59,11 +61,12 @@ Api.interceptors.response.use(
       console.error(
         "Akses ditolak: Anda tidak memiliki izin untuk mengakses fitur ini.",
       );
-      // tambahin toast
+      toast.error("Akses ditolak: Anda tidak memiliki izin.");
     }
 
     if (error.response && error.response.status === 500) {
       console.error("Terjadi kesalahan pada server. Silakan coba lagi nanti.");
+      toast.error("Terjadi kesalahan pada server. Silakan coba lagi nanti.");
     }
 
     return Promise.reject(error);

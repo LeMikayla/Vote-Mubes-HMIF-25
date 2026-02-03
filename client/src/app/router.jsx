@@ -1,9 +1,10 @@
+import { Navigate } from "react-router-dom";
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "../features/auth/components/protectedRoute";
 
-import DashboardAdminLayout from "./layouts/DashboardAdmin.jsx";
-import MainLayout from "./layouts/MainLayout.jsx";
-import AuthLayout from "./layouts/AuthLayout.jsx";
+import DashboardAdminLayout from "./layouts/dashboardAdminLayout.jsx";
+import MainLayout from "./layouts/mainLayout.jsx";
+import AuthLayout from "./layouts/authLayout.jsx";
 
 import Login from "../features/auth/pages/login.jsx";
 import DashboardAdmin from "../features/admin/pages/dashboardAdmin.jsx";

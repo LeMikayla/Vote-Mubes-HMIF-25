@@ -7,13 +7,21 @@ import Layout from "./layout";
 import Button from "./button";
 
 // 1. CONFIRMATION MODAL
-export function ConfirmContent({ candidateName, onCancel, onConfirm, isLoading }) {
+export function ConfirmContent({
+  candidateName,
+  onCancel,
+  onConfirm,
+  isLoading,
+}) {
   return (
     <Layout icon={AlertTriangle}>
       <p className="text-[20px] font-serif text-[#9D1016] leading-snug mb-2.5">
         Apakah Anda yakin memilih
         <br />
-        <span className="font-bold uppercase">{candidateName || "Kandidat ini"}</span>?
+        <span className="font-bold uppercase">
+          {candidateName || "Kandidat ini"}
+        </span>
+        ?
       </p>
 
       <div className="flex gap-5.75">

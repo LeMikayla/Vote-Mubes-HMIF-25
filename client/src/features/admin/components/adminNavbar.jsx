@@ -1,4 +1,3 @@
-"use client";
 import { LogOut, PieChart, Users, FileText, Settings } from "lucide-react"; // Optional: Icon biar keren
 // Kalau tidak ada lucide-react, hapus import di atas dan icon component di bawah
 

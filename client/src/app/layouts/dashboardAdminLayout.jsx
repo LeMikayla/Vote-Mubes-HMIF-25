@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import { socket } from "../../../lib/socket";
+import { socket } from "../../lib/socket";
 
 export default function DashboardAdminLayout({}) {
   useEffect(() => {

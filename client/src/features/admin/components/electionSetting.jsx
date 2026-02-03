@@ -1,8 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import { electionService } from "../../voting/services/electionServices";
+import { electionService } from "../../voting/services/electionService";
+import { voteService } from "../../voting/services/voteService";
 import { Calendar, Save, Clock } from "lucide-react";
 import Loader from "../../../shared/components/loader.jsx";
+import { toast } from "sonner";
 
 export default function ElectionSetting() {
   const [deadline, setDeadline] = useState("");
@@ -45,12 +47,45 @@ export default function ElectionSetting() {
         status: status,
       });
 
-      alert("✅ Jadwal pemilihan berhasil diperbarui!");
-      // tambahkan toast
+      toast.success("Jadwal berhasil diperbarui.");
     } catch (error) {
       console.error(error);
-      alert("❌ Gagal update jadwal.");
-      // tambahkan toast
+      toast.error("Gagal update jadwal.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = async () => {
+    // 1. Konfirmasi Awal (Biar gak kepencet)
+    const isConfirmed = window.confirm(
+      "⚠️ PERINGATAN KERAS!\n\nApakah Anda yakin ingin MENGHAPUS SEMUA SUARA dan MEMULAI ULANG pemilihan dari nol?\n\nTindakan ini tidak bisa dibatalkan!",
+    );
+    if (!isConfirmed) return;
+
+    // 2. Konfirmasi Ganda (Safety Prompt)
+    // Admin harus mengetik kata 'RESET' secara manual agar sadar
+    const safetyCheck = window.prompt(
+      "Ketik 'RESET' (huruf besar) untuk konfirmasi penghapusan database suara:",
+    );
+
+    if (safetyCheck !== "RESET") {
+      return toast.error("Konfirmasi salah. Pembatalan dilakukan.");
+    }
+
+    // 3. Eksekusi ke Backend
+    setLoading(true);
+    try {
+      await voteService.resetElection();
+
+      toast.success("BERHASIL! Kotak suara telah dikosongkan.");
+
+      // Opsional: Reload halaman biar fresh datanya
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      console.error(error);
+      const msg = error.response?.data?.message || "Gagal melakukan reset.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -116,6 +151,37 @@ export default function ElectionSetting() {
             </>
           )}
         </button>
+      </div>
+      {/* 🔥 ZONA BAHAYA (RESET) */}
+      <div className="p-5 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
+        <div className="flex flex-col md:flex-row gap-4 items-start">
+          {/* Ikon Peringatan */}
+          <div className="p-3 bg-red-100 rounded-full shrink-0 text-2xl">
+            ☠️
+          </div>
+
+          <div className="flex-1">
+            <h3 className="font-bold text-red-800 text-lg">
+              Zona Bahaya (Danger Zone)
+            </h3>
+            <p className="text-sm text-red-700 mt-1 mb-4 leading-relaxed">
+              Tombol di bawah ini akan <b>menghapus seluruh data suara</b> yang
+              sudah masuk ke database (`TRUNCATE votes`) dan mengembalikan
+              status semua pemilih menjadi "Belum Memilih".
+              <br />
+              <br />
+              Gunakan fitur ini hanya jika terjadi kesalahan fatal saat uji coba
+              atau ingin memulai ulang pemilihan.
+            </p>
+
+            <button
+              onClick={handleReset}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-md transition-all active:scale-95 flex items-center gap-2"
+            >
+              <span>🗑️</span> RESET SEMUA SUARA & DATA
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

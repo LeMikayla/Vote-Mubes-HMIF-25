@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { userServices } from "../services/userServices";
+import * as XLSX from "xlsx";
 import { Search, RotateCcw, UserCheck, UserX } from "lucide-react";
+import Loader from "../../../shared/components/loader.jsx";
 
 export default function DaftarPemilih() {
   const [users, setUsers] = useState([]);
@@ -8,6 +10,7 @@ export default function DaftarPemilih() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState(null);
+  const fileInputRef = useRef(null);
 
   // 1. Load Semua Data (Default)
   const fetchAllUsers = async () => {
@@ -59,14 +62,131 @@ export default function DaftarPemilih() {
     }
   };
 
+  const handleDownloadTemplate = () => {
+    // Data dummy untuk contoh
+    const templateData = [
+      {
+        Username: "fefesj",
+        Email: "mhs1@unpad.ac.id",
+        Password: "12345(Opsional)",
+      },
+      { Username: "fesed", Email: "mhs2@unpad.ac.id", Password: "" },
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(templateData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    XLSX.writeFile(wb, "Template_DPT_HMIF.xlsx");
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = async (evt) => {
+      try {
+        const binaryStr = evt.target.result;
+        const workbook = XLSX.read(binaryStr, { type: "binary" });
+
+        // Ambil sheet pertama
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+
+        // Konversi ke JSON
+        const rawData = XLSX.utils.sheet_to_json(sheet);
+
+        if (rawData.length === 0) {
+          toast.error("File Excel kosong!");
+          return;
+        }
+
+        // Mapping Data (Sesuaikan Header Excel -> Key Database)
+        // Kita paksa formatnya biar sesuai backend
+        const formattedData = rawData
+          .map((row) => ({
+            username: String(row.NPM || row.npm || row.Username || ""), // Handle berbagai case
+            email: row.Email || row.email || null,
+            password: String(row.Password || row.password || "12345"), // Default password
+          }))
+          .filter((user) => user.username !== ""); // Hapus baris kosong
+
+        // Konfirmasi sebelum upload
+        if (
+          !window.confirm(
+            `Ditemukan ${formattedData.length} data. Lanjut import?`,
+          )
+        )
+          return;
+
+        // Kirim ke Backend
+        setLoading(true);
+        await userService.importUsers(formattedData);
+
+        toast.success(`Berhasil mengimport ${formattedData.length} pemilih!`);
+        fetchUsers(); // Refresh tabel
+      } catch (error) {
+        console.error(error);
+        toast.error("Gagal membaca file Excel. Pastikan format benar.");
+      } finally {
+        setLoading(false);
+        if (fileInputRef.current) fileInputRef.current.value = ""; // Reset input
+      }
+    };
+
+    reader.readAsBinaryString(file);
+  };
+
+  const handleDeleteAll = async () => {
+    // Safety Check 1
+    if (
+      !window.confirm(
+        "⚠️ PERINGATAN: Anda yakin ingin MENGHAPUS SEMUA DATA PEMILIH?\n\nSemua akun mahasiswa akan hilang. Akun Admin tetap aman.",
+      )
+    ) {
+      return;
+    }
+
+    // Safety Check 2 (Double Confirm)
+    const text = window.prompt(
+      "Ketik 'HAPUS' untuk mengonfirmasi pembersihan data DPT:",
+    );
+    if (text !== "HAPUS") return toast.error("Batal menghapus.");
+
+    try {
+      setLoading(true);
+      await userServices.deleteAllUsers();
+
+      toast.success("Database pemilih berhasil dibersihkan!");
+      fetchAllUsers(); // Refresh tabel jadi kosong
+    } catch (error) {
+      toast.error("Gagal menghapus data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 3. Fungsi Reset
   const handleReset = () => {
     setSearchQuery("");
     fetchAllUsers();
   };
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      {/* Input File Tersembunyi */}
+      <input
+        type="file"
+        accept=".xlsx, .xls"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+      />
       {/* --- HEADER & SEARCH BAR --- */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
@@ -106,6 +226,34 @@ export default function DaftarPemilih() {
             </button>
           )}
         </form>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {/* Tombol Download Template */}
+        <button
+          onClick={handleDownloadTemplate}
+          className="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 text-sm font-medium transition"
+        >
+          📥 Download Template
+        </button>
+
+        {/* Tombol Import (Trigger Input File) */}
+        <button
+          onClick={() => fileInputRef.current.click()}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2 transition"
+        >
+          📂 Import Excel
+        </button>
+
+        {/* Tombol Hapus Massal */}
+        {users.length > 0 && (
+          <button
+            onClick={handleDeleteAll}
+            className="px-4 py-2 bg-red-100 text-red-700 border border-red-200 rounded-lg hover:bg-red-200 text-sm font-medium transition"
+          >
+            🗑️ Hapus Semua
+          </button>
+        )}
       </div>
 
       {/* --- TABEL DATA --- */}

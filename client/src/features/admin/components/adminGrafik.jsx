@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from "react";
-import ResultCard from "../../voting/components/ResultCard"; // Gunakan komponen grafik yang sudah ada
-import { voteService } from "../../voting/services/voteService";
-import { socket } from "../../../lib/socket"; // Import socket client
+import ResultCard from "../../results/components/resultCard";
+import { useLiveResult } from "../../results/hooks/useLiveResult";
+import Loader from "../../../shared/components/loader";
 
 export default function AdminGrafik() {
-  const [chartData, setChartData] = useState([]);
-  const [stats, setStats] = useState({ totalVotes: 0, totalDPT: 0 });
-  const [isConnected, setIsConnected] = useState(false);
+  const { results, stats, loading, isConnected } = useLiveResult();
 
-  // Helper Format Data (Sama kayak di ResultPage)
+  // Helper Format Data (Tetap dibutuhkan untuk UI)
   const formatChartData = (rawData) => {
+    if (!rawData) return [];
     return rawData.map((item) => ({
       name: item.name,
       value: parseInt(item.total_votes, 10),
@@ -18,65 +16,10 @@ export default function AdminGrafik() {
     }));
   };
 
-  // 1. Fetch Data Awal (HTTP)
-  const fetchInitialData = async () => {
-    try {
-      const [resultsRes, statsRes] = await Promise.all([
-        voteService.getResults(),
-        voteService.getStatistics(),
-      ]);
+  const chartData = formatChartData(results);
 
-      setChartData(formatChartData(resultsRes.data));
-
-      if (statsRes.data) {
-        setStats({
-          totalVotes: parseInt(statsRes.data.total_suara_masuk, 10),
-          totalDPT: parseInt(statsRes.data.total_daftar_pemilih_tetap, 10),
-        });
-      }
-    } catch (error) {
-      console.error("Gagal load data awal:", error);
-    }
-  };
-
-  useEffect(() => {
-    // Load data HTTP biasa dulu
-    fetchInitialData();
-
-    // 2. Setup Socket
-    socket.connect();
-
-    const onConnect = () => setIsConnected(true);
-    const onDisconnect = () => setIsConnected(false);
-
-    // 🔥 3. DENGARKAN EVENT DARI BACKEND
-    const onVoteUpdate = (data) => {
-      console.log("⚡ Update Real-time diterima!", data);
-
-      // Update State langsung tanpa refresh halaman
-      if (data.results) {
-        setChartData(formatChartData(data.results));
-      }
-      if (data.statistics) {
-        setStats({
-          totalVotes: parseInt(data.statistics.total_suara_masuk, 10),
-          totalDPT: parseInt(data.statistics.total_daftar_pemilih_tetap, 10),
-        });
-      }
-    };
-
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    socket.on("vote_update", onVoteUpdate); // Nama event harus sama dgn Controller
-
-    // Cleanup
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-      socket.off("vote_update", onVoteUpdate);
-      socket.disconnect();
-    };
-  }, []);
+  // Jika loading awal, tampilkan loader (Opsional, atau biarkan render kosong dulu)
+  if (loading) return <Loader />;
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 min-h-125">

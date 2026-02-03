@@ -1,17 +1,24 @@
 import { Outlet } from "react-router-dom";
-import DekorasiScroll from "../features/auth/components/scroll/dekorasiScroll.jsx";
+import DekorasiScroll from "../../features/auth/components/scroll/dekorasiScroll.jsx";
+import Navbar from "../../shared/components/navbar/navbar.jsx";
 
 const AuthLayout = () => {
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen bg-gray-100 py-10">
+    <div className="relative flex flex-col items-center justify-center min-h-screen bg-gray-100 py-10 overflow-hidden">
+      {/* 🔥 0. NAVBAR (Ditempel di paling atas) */}
+      <div className="absolute top-0 left-0 w-full z-50">
+        <Navbar />
+      </div>
+
       {/* 1. UPPER SCROLL BAR (Hiasan Atas) */}
-      <div className="relative z-20 -mb-2 filter drop-shadow-md">
+      {/* Ditambah margin-top agar tidak tertutup navbar jika layarnya kecil */}
+      <div className="relative z-20 -mb-2 filter drop-shadow-md mt-16 md:mt-0">
         <DekorasiScroll />
       </div>
 
       {/* 2. KERTAS UTAMA (Container) */}
       <div
-        className="w-81.5 min-h-103.75 relative z-10 pb-20"
+        className="w-81.5 min-h-103.75 relative z-10 pb-20 transition-all duration-500"
         style={{
           backgroundImage: "url('/images/paper.png')",
           backgroundSize: "cover",
@@ -19,7 +26,7 @@ const AuthLayout = () => {
         }}
       >
         <div className="w-full flex flex-col items-center pt-6 px-5">
-          {/* A. HEADER SECTION (Badge & Text) - Statis di Layout */}
+          {/* A. HEADER SECTION (Badge & Text) */}
           <div className="flex items-center gap-4 w-full mb-6">
             {/* Badge Logo */}
             <div className="relative w-22.5 h-22.5 shrink-0">
@@ -72,7 +79,7 @@ const AuthLayout = () => {
             </div>
           </div>
 
-          {/* C. OUTLET (Lubang untuk Konten Halaman Login/Register) */}
+          {/* C. OUTLET (Form Login/Register akan muncul disini) */}
           <div className="w-full">
             <Outlet />
           </div>

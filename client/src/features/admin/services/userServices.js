@@ -15,4 +15,9 @@ export const userServices = {
     const response = await Api.get(`/users/search/${username}`);
     return response.data;
   },
+
+  deleteAllUsers: async () => {
+    const response = await Api.delete("/users/all");
+    return response.data;
+  },
 };

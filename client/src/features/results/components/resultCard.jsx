@@ -1,4 +1,4 @@
-import VoteChart from "./chart/VoteChart";
+import VoteChart from "./voteChart";
 
 export default function ResultCard({ chartData }) {
   const cs = 12; // Corner Size (Ukuran potongan sudut)

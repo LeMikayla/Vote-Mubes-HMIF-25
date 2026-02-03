@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
-import AdminNavbar from "./components/adminNavbar";
-import DaftarCalon from "./components/daftarCalon";
-import FormCalon from "./components/formCalon";
-import DaftarPemilih from "./components/DaftarPemilih";
-import ElectionSetting from "./components/electionSetting.jsx";
-import AdminGrafik from "./components/adminGrafik";
+import AdminNavbar from "../components/adminNavbar";
+import DaftarCalon from "../components/daftarCalon";
+import FormCalon from "../components/formCalon";
+import DaftarPemilih from "../components/daftarPemilih";
+import ElectionSetting from "../components/electionSetting.jsx";
+import AdminGrafik from "../components/adminGrafik";
 
 export default function App() {
   const [page, setPage] = useState("list");

@@ -1,17 +1,13 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
-import Loader from "../../shared/components/loader.jsx";
+import Loader from "../../../shared/components/loader.jsx";
 
 const ProtectedRoute = ({ allowedRoles = [] }) => {
   const { user, token, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <Loader />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!token) {

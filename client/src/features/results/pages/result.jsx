@@ -1,8 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
-// Services
-import { electionService } from "../services/electionService";
-import { voteService } from "../services/voteService"; // Import service yang baru diupdate
+import { useMemo } from "react"; // Tambah useMemo
+import { useStaticResult } from "../hooks/useStaticResult";
 import { useCountdown } from "../../../shared/hooks/useCountdown";
 
 // Components
@@ -10,92 +8,54 @@ import ResultCard from "../components/resultCard";
 import ResultHeader from "../components/resultHeader";
 import InfoBar from "../components/infobar";
 import ActionBar from "../components/actionBar";
-import Loader from "../../../shared/components/loader"; // Opsional: Pakai loader
+import Loader from "../../../shared/components/loader";
+import { toast } from "sonner"; // Import toast jika dipakai di action bar
 
 function Result() {
-  // --- STATE ---
-  const [deadline, setDeadline] = useState(null);
-  const [chartData, setChartData] = useState([]); // Data untuk Grafik
-  const [stats, setStats] = useState({ total: 0, participated: 0 }); // Data Statistik
-  const [loading, setLoading] = useState(true);
+  const { results, stats, deadline, loading, refetching, refetch } =
+    useStaticResult();
 
+  // 2. Countdown Logic
   const timeLeftObj = useCountdown(deadline);
 
-  // --- FETCH DATA ---
-  const fetchAllData = async () => {
-    try {
-      setLoading(true);
+  // 3. Format Data untuk Grafik (Gunakan useMemo agar tidak render ulang percuma)
+  const chartData = useMemo(() => {
+    if (!results || results.length === 0) return [];
 
-      // Panggil 3 API Sekaligus: Config, Hasil Vote, Statistik
-      const [configRes, resultsRes, statsRes] = await Promise.all([
-        electionService.getConfig(),
-        voteService.getResults(),
-        voteService.getStatistics(),
-      ]);
+    return results.map((item) => ({
+      name: item.name,
+      value: parseInt(item.total_votes || 0),
+      xLabel: parseInt(item.total_votes || 0),
+      avatar: item.image_url || `https://ui-avatars.com/api/?name=${item.name}`,
+    }));
+  }, [results]);
 
-      // 1. Set Config Deadline
-      if (configRes.endDate) setDeadline(configRes.endDate);
-
-      // 2. Set Data Grafik
-      // Kita perlu mapping data dari Backend supaya cocok dengan format Chart UI
-      // Backend: { name, total_votes, percentage, image_url }
-      // Frontend Chart butuh: { name, value, xLabel, avatar }
-      const formattedChartData = resultsRes.data.map((item) => ({
-        name: item.name,
-        value: parseInt(item.total_votes), // Tinggi pilar
-        xLabel: parseInt(item.total_votes), // Angka di bawah pilar
-        avatar:
-          item.image_url || `https://ui-avatars.com/api/?name=${item.name}`, // Fallback avatar jika null
-      }));
-      setChartData(formattedChartData);
-
-      // 3. Set Statistik
-      if (statsRes.data) {
-        setStats({
-          participated: parseInt(statsRes.data.total_pemilih_berpartisipasi),
-          total: parseInt(statsRes.data.total_daftar_pemilih_tetap),
-        });
-      }
-    } catch (error) {
-      console.error("Gagal memuat hasil voting:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Load saat pertama kali buka
-  useEffect(() => {
-    fetchAllData();
-  }, []);
-
-  // --- LOGIC LAIN ---
+  // 4. Format Waktu Header
   const formatTimeText = () => {
     if (!timeLeftObj) return "DITUTUP";
     const { hours, minutes, seconds } = timeLeftObj;
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   };
 
-  const handleRefresh = () => {
-    fetchAllData(); // Panggil ulang API saat tombol refresh ditekan
-  };
-
+  // --- RENDER ---
   if (loading) return <Loader />;
 
   return (
     <>
       <main className="flex-1 flex flex-col items-center w-full">
-        {/* 1. Header */}
+        {/* Header */}
         <ResultHeader
           timeLeftText={formatTimeText()}
-          onRefresh={handleRefresh}
+          onRefresh={refetch} // 👈 Langsung pakai fungsi refetch dari hook
+          isRefreshing={refetching} // Opsional: jika ResultHeader butuh loading state
         />
 
-        {/* 2. Grafik (Kirim Data Real) */}
+        {/* Grafik */}
         <div className="flex justify-center w-full my-6 animate-zoom-in">
           <ResultCard chartData={chartData} />
         </div>
 
-        {/* 3. Info Bar (Kirim Statistik Real) */}
+        {/* Info Bar */}
         <InfoBar
           totalVotes={stats.participated}
           maxVotes={stats.total}
@@ -105,10 +65,10 @@ function Result() {
           })}
         />
 
-        {/* 4. Action Bar */}
+        {/* Action Bar */}
         <ActionBar
-          onShare={() => alert("Fitur Share segera hadir!")}
-          onDownload={() => alert("Fitur Unduh segera hadir!")}
+          onShare={() => toast.info("Fitur Share akan segera hadir!")}
+          onDownload={() => toast.info("Fitur Unduh akan segera hadir!")}
         />
       </main>
 

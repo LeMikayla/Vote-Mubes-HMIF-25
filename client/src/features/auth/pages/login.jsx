@@ -1,5 +1,5 @@
 "use client";
-import LoginForm from "../components/loginForm.jsx";
+import LoginForm from "../components/scroll/loginForm.jsx";
 
 const Login = () => {
   return (

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import RomanInput from "./romanInput.jsx"; // Import komponen pecahan tadi
 import { useAuth } from "../../hooks/useAuth.js";
+import { toast } from "sonner";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ npm: "", password: "" });
@@ -20,7 +21,7 @@ const LoginForm = () => {
     e.preventDefault();
 
     if (!formData.npm || !formData.password) {
-      //tambahin toast
+      toast.error("NPM dan kata sandi wajib diisi.");
       return;
     }
     const result = await login(formData.npm, formData.password);
@@ -29,12 +30,14 @@ const LoginForm = () => {
       const userRole = result.user?.role;
 
       if (userRole === "admin") {
+        toast.success("Login berhasil! Selamat datang Admin.");
         navigate("/admin");
       } else {
+        toast.success(`Login berhasil! Selamat datang ${formData.npm}.`);
         navigate("/vote");
       }
     } else {
-      //tambahin toast
+      toast.error(result.message || "Gagal login. Silakan coba lagi.");
     }
   };
 
@@ -79,7 +82,6 @@ const LoginForm = () => {
           }
         />
 
-        {/* Link Lupa Password (Hanya hiasan UI) */}
         <div className="w-full flex justify-end">
           <button
             type="button"

@@ -10,4 +10,9 @@ export const voteService = {
     const response = await Api.get("/votes/check");
     return response.data;
   },
+
+  resetElection: async () => {
+    const response = await Api.delete("/votes/reset");
+    return response.data;
+  },
 };

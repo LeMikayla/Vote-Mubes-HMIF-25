@@ -3,18 +3,19 @@ import { useState, useEffect, useRef } from "react";
 import { electionService } from "../services/electionService";
 import { candidateService } from "../services/candidateService";
 import { voteService } from "../services/voteService";
-import { useCountdown } from "@/shared/hooks/useCountdown";
+import { useCountdown } from "../../../shared/hooks/useCountdown";
 import {
   ConfirmContent,
   SuccessContent,
 } from "../../../shared/components/modal/content";
-import Loader from "../../../shared/components/loader";
 import { DiamondIcon } from "../components/icons/mergedIcon";
 
 // --- IMPORT KOMPONEN BARU ---
 import VotingHeader from "../components/votingHeader";
 import CandidateSlider from "../components/candidateSlider";
 import VotingFooter from "../components/votingFooter";
+import Loader from "../../../shared/components/loader";
+import { toast } from "sonner";
 
 function Voting() {
   // --- STATE ---
@@ -48,6 +49,7 @@ function Voting() {
         if (configData.endDate) setDeadline(configData.endDate);
       } catch (error) {
         console.error("Gagal memuat data:", error);
+        toast.error("Gagal memuat data.");
       } finally {
         setLoading(false);
       }
@@ -62,8 +64,9 @@ function Voting() {
     try {
       await voteService.castVote(selectedCandidate.id);
       setModal("success");
+      toast.success("Suara berhasil dicatat!");
     } catch (error) {
-      alert(error.response?.data?.message || "Gagal mengirim suara.");
+      toast.error(error.response?.data?.message || "Gagal mengirim suara.");
       setModal(null);
     } finally {
       setSubmitting(false);
