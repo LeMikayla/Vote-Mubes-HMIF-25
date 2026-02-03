@@ -13,19 +13,22 @@ import Result from "../features/results/pages/result.jsx";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
+    path: "",
     element: <AuthLayout />,
-    children: [{ path: "login", element: <Login /> }],
+    children: [
+      { index: true, element: <Navigate to="/login" replace /> },
+      { path: "login", element: <Login /> },
+    ],
   },
 
   {
-    element: <ProtectedRoute allowedRoles={["voter"]} />,
+    element: <ProtectedRoute allowedRoles={["user"]} />,
     children: [
       {
         path: "/",
         element: <MainLayout />,
         children: [
-          { path: "vote", element: <Voting /> },
+          { path: "votes", element: <Voting /> },
           { path: "results", element: <Result /> },
         ],
       },

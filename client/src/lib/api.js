@@ -2,7 +2,7 @@ import axios from "axios";
 import { toast } from "sonner";
 
 const Api = axios.create({
-  baseURL: import.meta.env.VITE_Api_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: Number(import.meta.env.VITE_TIMEOUT) || 10000,
   headers: {
     "Content-Type": "application/json",

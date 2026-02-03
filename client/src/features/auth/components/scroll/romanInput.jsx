@@ -11,11 +11,7 @@ const RomanInput = ({
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-12.5 h-12.5 z-20">
         <div className="absolute inset-0 rotate-45 border-2 border-black bg-black translate-y-1" />
         <div className="absolute inset-0 rotate-45 border-2 border-black bg-white overflow-hidden flex items-center justify-center">
-          <img
-            src={iconSrc}
-            alt=""
-            className="-rotate-45 w-[65%] h-[65%] object-contain"
-          />
+          <img src={iconSrc} alt="" className="w-full h-full object-cover" />
         </div>
       </div>
 

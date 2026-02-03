@@ -11,8 +11,8 @@ const Navbar = () => {
   // Logic: Menentukan step aktif berdasarkan URL
   const getCurrentStep = () => {
     if (location.pathname === "/") return 1;
-    if (location.pathname === "/vote") return 2;
-    if (location.pathname === "/result") return 3;
+    if (location.pathname === "/votes") return 2;
+    if (location.pathname === "/results") return 3;
     return 1;
   };
 
@@ -62,7 +62,7 @@ const Navbar = () => {
               stepNumber={2}
               label="Vote"
               isActive={currentStep === 2}
-              onClick={() => navigate("/vote")}
+              onClick={() => navigate("/votes")}
               marginTop={DROP_Y * 0.6}
             />
 
@@ -71,7 +71,7 @@ const Navbar = () => {
               stepNumber={3}
               label="Live Count"
               isActive={currentStep === 3}
-              onClick={() => navigate("/live-count")}
+              onClick={() => navigate("/results")}
             />
           </div>
         </div>

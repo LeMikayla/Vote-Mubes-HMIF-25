@@ -1,10 +1,18 @@
 import { Outlet } from "react-router-dom";
 import DekorasiScroll from "../../features/auth/components/scroll/dekorasiScroll.jsx";
+import Paper from "../../assets/images/paper.png";
 import Navbar from "../../shared/components/navbar/navbar.jsx";
+import RomanFace from "../../assets/images/roman-face.png";
 
 const AuthLayout = () => {
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen bg-gray-100 py-10 overflow-hidden">
+    <div
+      className="relative flex flex-col items-center justify-center min-h-screen py-10 overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(135deg, #F0DEC1 0%, #F6E7D4 19%, #FAE1C8 63%, #F0CEB0 100%)",
+      }}
+    >
       {/* 🔥 0. NAVBAR (Ditempel di paling atas) */}
       <div className="absolute top-0 left-0 w-full z-50">
         <Navbar />
@@ -18,9 +26,9 @@ const AuthLayout = () => {
 
       {/* 2. KERTAS UTAMA (Container) */}
       <div
-        className="w-81.5 min-h-103.75 relative z-10 pb-20 transition-all duration-500"
+        className="w-81.5 min-h-103.75 relative z-10 pb-20 transition-all duration-500 drop-shadow-md"
         style={{
-          backgroundImage: "url('/images/paper.png')",
+          backgroundImage: `url('${Paper}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -34,8 +42,8 @@ const AuthLayout = () => {
               <div className="absolute inset-0 rounded-full bg-[#9D1016] flex items-center justify-center">
                 <div className="w-21 h-21 rounded-full border-[3px] border-[#F5A939] overflow-hidden flex items-center justify-center bg-white">
                   <img
-                    src="/images/roman-face.png"
-                    alt="Logo Organisasi"
+                    src={RomanFace}
+                    alt="Logo Caesar"
                     className="w-full h-full object-cover"
                   />
                 </div>

@@ -24,7 +24,7 @@ const Loader = () => {
 
   return (
     // 1. Container Overlay (Full Screen, Semi-transparan)
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-[2px] transition-opacity">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-[2px] transition-opacity">
       {/* Inject CSS Keyframes */}
       <style>{keyframeStyle}</style>
 

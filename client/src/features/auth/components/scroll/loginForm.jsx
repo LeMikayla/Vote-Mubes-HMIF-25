@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import RomanInput from "./romanInput.jsx"; // Import komponen pecahan tadi
+import RomanInput from "./romanInput.jsx";
+import Username from "../../../../assets/images/username.png";
+import Password from "../../../../assets/images/password.png";
 import { useAuth } from "../../hooks/useAuth.js";
 import { toast } from "sonner";
 
@@ -34,7 +36,7 @@ const LoginForm = () => {
         navigate("/admin/dashboardAdmin");
       } else {
         toast.success(`Login berhasil! Selamat datang ${formData.npm}.`);
-        navigate("/vote");
+        navigate("/votes");
       }
     } else {
       toast.error(result.message || "Gagal login. Silakan coba lagi.");
@@ -49,7 +51,7 @@ const LoginForm = () => {
       {/* --- INPUT NPM --- */}
       <div className="flex flex-col items-start gap-1 w-full">
         <RomanInput
-          iconSrc="/images/NPM.png"
+          iconSrc={Username}
           placeholder="Masukkan NPM kamu"
           // Props penting agar bisa diketik:
           name="npm"
@@ -62,7 +64,7 @@ const LoginForm = () => {
       {/* --- INPUT PASSWORD --- */}
       <div className="flex flex-col items-start gap-1 w-full">
         <RomanInput
-          iconSrc="/images/PW.png"
+          iconSrc={Password}
           placeholder="Masukkan kata sandi"
           // Props penting agar bisa diketik:
           name="password"
@@ -81,19 +83,10 @@ const LoginForm = () => {
             </button>
           }
         />
-
-        <div className="w-full flex justify-end">
-          <button
-            type="button"
-            className="text-[11px] text-[#9D1016] hover:underline"
-          >
-            Kirim Ulang Kata Sandi
-          </button>
-        </div>
       </div>
 
       {/* --- TOMBOL LOGIN --- */}
-      <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-30">
+      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-30">
         <button
           type="submit"
           disabled={loading} // Cegah klik ganda

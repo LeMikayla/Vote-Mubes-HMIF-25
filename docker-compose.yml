@@ -75,9 +75,9 @@ services:
       # Database Configuration
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: votingdb
-      DB_USER: votinguser
-      DB_PASSWORD: PasswordKuat2024!
+      DB_NAME: mubes_db
+      DB_USER: postgres
+      DB_PASSWORD: realpass
       DB_MAX_CONNECTIONS: 20
       
       # Redis Configuration

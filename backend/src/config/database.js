@@ -1,20 +1,20 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'mubes_test',
-  password: 'rayan',
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
 // Test connection
-pool.on('connect', () => {
-  console.log('Database connected successfully');
+pool.on("connect", () => {
+  console.log("Database connected successfully");
 });
 
-pool.on('error', (err) => {
-  console.error('!Unexpected database error:', err);
+pool.on("error", (err) => {
+  console.error("!Unexpected database error:", err);
 });
 
 module.exports = pool;
