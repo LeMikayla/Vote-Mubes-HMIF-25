@@ -3,6 +3,7 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 require("dotenv").config();
+const path = require("path");
 
 const ConfigModel = require("./src/models/configModel");
 
@@ -38,6 +39,8 @@ app.use(
     credentials: false,
   }),
 );
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Handle preflight requests
 app.options("*", cors());

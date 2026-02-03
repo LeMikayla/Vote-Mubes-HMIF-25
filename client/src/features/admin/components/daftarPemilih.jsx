@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { userServices } from "../services/userServices";
 import * as XLSX from "xlsx";
 import { Search, RotateCcw, UserCheck, UserX } from "lucide-react";
 import Loader from "../../../shared/components/loader.jsx";
+import { toast } from "sonner";
 
 export default function DaftarPemilih() {
   const [users, setUsers] = useState([]);
@@ -10,19 +11,22 @@ export default function DaftarPemilih() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState(null);
-  const fileInputRef = useRef(null);
+  const fileInputRef = React.useRef(null);
 
   // 1. Load Semua Data (Default)
   const fetchAllUsers = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await userServices.getAllUsers();
-      setUsers(data);
+      const response = await userServices.getAllUsers();
+      // ✅ Handle response structure
+      const data = response.data || response;
+      setUsers(Array.isArray(data) ? data : []);
       setIsSearching(false);
     } catch (err) {
       console.error(err);
       setError("Gagal memuat data pemilih.");
+      setUsers([]); // ✅ Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -228,7 +232,7 @@ export default function DaftarPemilih() {
         </form>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 mb-4">
         {/* Tombol Download Template */}
         <button
           onClick={handleDownloadTemplate}
@@ -292,9 +296,9 @@ export default function DaftarPemilih() {
                     key={user.id}
                     className="border-b border-gray-100 hover:bg-gray-50 transition"
                   >
-                    <td className="p-4 text-gray-600">#{user.id}</td>
+                    <td className="p-4 text-gray-600">#{user.id || "-"}</td>
                     <td className="p-4 font-medium text-gray-800">
-                      {user.username}
+                      {user.username || "N/A"}
                     </td>
                     <td className="p-4">
                       <span
@@ -304,7 +308,7 @@ export default function DaftarPemilih() {
                             : "bg-blue-100 text-blue-700"
                         }`}
                       >
-                        {user.role.toUpperCase()}
+                        {(user.role || "USER").toUpperCase()}
                       </span>
                     </td>
                     <td className="p-4">

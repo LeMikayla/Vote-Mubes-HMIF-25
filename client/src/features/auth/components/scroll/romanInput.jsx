@@ -36,7 +36,7 @@ const RomanInput = ({
         <input
           type={type}
           placeholder={placeholder}
-          className="w-full bg-transparent outline-none text-[13px] text-gray-600 placeholder:text-gray-400"
+          className="w-full bg-transparent outline-none text-[13px] text-gray-800 placeholder:text-gray-600"
           {...props}
         />
         {rightElement}

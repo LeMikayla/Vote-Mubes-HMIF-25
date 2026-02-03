@@ -33,7 +33,7 @@ export default function DaftarCalon({ onTambah, onEdit }) {
     if (!confirm("Yakin ingin menghapus calon ini?")) return;
 
     try {
-      await adminService.deleteCandidate(id);
+      await adminServices.deleteCandidate(id);
       fetchData();
     } catch (error) {
       console.error("Gagal menghapus data:", error);
@@ -42,7 +42,7 @@ export default function DaftarCalon({ onTambah, onEdit }) {
   };
 
   const handleImageError = (e, name) => {
-    e.targeet.oneerror = null;
+    e.target.onerror = null;
     e.target.src = getUiAvatar(name);
   };
 
@@ -74,20 +74,25 @@ export default function DaftarCalon({ onTambah, onEdit }) {
               key={c.id}
               className="bg-white rounded-xl p-4 shadow-lg flex gap-4"
             >
-              {c.foto && (
-                <img
-                  src={c.foto ? c.foto : getUiAvatar(c.nama)}
-                  alt={c.nama}
-                  onError={(e) => handleImageError(e, c.nama)}
-                  className="w-22.5 h-22.5 rounded-full object-cover border-2 border-gray-200"
-                />
-              )}
+              <img
+                src={
+                  c.image_url
+                    ? `http://localhost:3000${c.image_url}`
+                    : getUiAvatar(c.name)
+                }
+                alt={c.name}
+                onError={(e) => handleImageError(e, c.name)}
+                className="w-22.5 h-22.5 rounded-full object-cover border-2 border-gray-200"
+              />
 
               <div className="flex-1">
-                <h3 className="text-lg font-semibold">{c.nama}</h3>
+                <h3 className="text-lg font-semibold">{c.name}</h3>
                 <small className="text-gray-500">NPM: {c.npm}</small>
                 <p className="mt-2 line-clamp-2">
-                  <b>Visi:</b> {c.visi}
+                  <b>Visi:</b> {c.vision}
+                </p>
+                <p className="mt-2 line-clamp-2">
+                  <b>Misi:</b> {c.mission}
                 </p>
 
                 <div className="mt-3 space-x-2">

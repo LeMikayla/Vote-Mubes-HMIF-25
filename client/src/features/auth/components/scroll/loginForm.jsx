@@ -48,8 +48,9 @@ const LoginForm = () => {
 
   return (
     <form
+      id="login-form"
       onSubmit={handleLogin}
-      className="flex flex-col items-start gap-10 w-full mt-8"
+      className="flex flex-col items-start gap-8 w-full mt-6"
     >
       {/* --- INPUT NPM --- */}
       <div className="flex flex-col items-start gap-1 w-full">
@@ -83,37 +84,6 @@ const LoginForm = () => {
             </button>
           }
         />
-      </div>
-
-      {/* --- TOMBOL LOGIN --- */}
-      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-30">
-        <button
-          type="submit"
-          disabled={loading}
-          className="relative w-19.5 h-19.5 rounded-full cursor-pointer transition-transform hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-          style={{
-            background: "#9D1016",
-            boxShadow: "0 6px 0 #762125, 0 8px 12px rgba(0,0,0,0.3)",
-          }}
-        >
-          <div
-            className="absolute inset-1 rounded-full pointer-events-none"
-            style={{
-              background: "transparent",
-              border: "3px solid transparent",
-              borderTopColor: "transparent",
-              borderRightColor: "#B6474C",
-              transform: "rotate(225deg)",
-            }}
-          />
-
-          <span
-            className="absolute inset-0 flex items-center justify-center text-white font-serif text-sm tracking-wider"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
-          >
-            {loading ? "..." : "LOGIN"}
-          </span>
-        </button>
       </div>
     </form>
   );

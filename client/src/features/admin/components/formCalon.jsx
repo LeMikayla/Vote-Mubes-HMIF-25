@@ -4,23 +4,23 @@ import { toast } from "sonner";
 
 export default function FormCalon({ calon, onBack }) {
   const [form, setForm] = useState({
-    nama: "",
+    name: "",
     npm: "",
-    visi: "",
-    misi: "",
+    vision: "",
+    mission: "",
     foto: null,
   });
 
-  const [submitting, setSubmitting] = useState(false);
+  const [Submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (calon) {
       setForm({
-        nama: calon.nama || "",
+        name: calon.name || "",
         npm: calon.npm || "",
-        visi: calon.visi || "",
-        misi: calon.misi || "",
-        foto: calon.foto || null,
+        vision: calon.vision || "",
+        mission: calon.mission || "",
+        foto: calon.image_url || null,
       });
     }
   }, [calon]);
@@ -31,6 +31,17 @@ export default function FormCalon({ calon, onBack }) {
   const handleFoto = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // ✅ Validate file type
+      if (!file.type.startsWith("image/")) {
+        toast.error("File harus berupa gambar!");
+        return;
+      }
+
+      // ✅ Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Ukuran file maksimal 5MB!");
+        return;
+      }
       setForm({ ...form, foto: file });
     }
   };
@@ -41,10 +52,10 @@ export default function FormCalon({ calon, onBack }) {
 
     try {
       const formData = new FormData();
-      formData.append("nama", form.nama);
+      formData.append("name", form.name);
       formData.append("npm", form.npm);
-      formData.append("visi", form.visi);
-      formData.append("misi", form.misi);
+      formData.append("vision", form.vision);
+      formData.append("mission", form.mission);
 
       if (form.foto && typeof form.foto === "object") {
         formData.append("foto", form.foto);
@@ -58,6 +69,12 @@ export default function FormCalon({ calon, onBack }) {
       onBack();
     } catch (error) {
       console.error("Gagal menyimpan data:", error);
+
+      if (error.response) {
+        console.log("Data error dari server:", error.response.data);
+        console.log("Status:", error.response.status);
+        console.log("Headers:", error.response.headers);
+      }
       toast.error("Gagal menyimpan data calon.");
     } finally {
       setSubmitting(false);
@@ -67,9 +84,10 @@ export default function FormCalon({ calon, onBack }) {
   const getFotoPreview = () => {
     if (!form.foto) return null;
 
-    return typeof form.foto === "string"
-      ? form.foto
-      : URL.createObjectURL(form.foto);
+    if (typeof form.foto === "string") {
+      return `http://localhost:3000${form.foto}`;
+    }
+    return URL.createObjectURL(form.foto);
   };
 
   return (
@@ -80,9 +98,9 @@ export default function FormCalon({ calon, onBack }) {
 
       <form onSubmit={submit} className="space-y-4">
         <input
-          name="nama"
-          placeholder="Nama"
-          value={form.nama}
+          name="name"
+          placeholder="name"
+          value={form.name}
           onChange={handleChange}
           required
           className="w-full p-2.5 border border-slate-300 rounded-md"
@@ -98,18 +116,18 @@ export default function FormCalon({ calon, onBack }) {
         />
 
         <textarea
-          name="visi"
-          placeholder="Visi"
-          value={form.visi}
+          name="vision"
+          placeholder="vision"
+          value={form.vision}
           onChange={handleChange}
           required
           className="w-full p-2.5 border border-slate-300 rounded-md resize-y min-h-25"
         />
 
         <textarea
-          name="misi"
-          placeholder="Misi"
-          value={form.misi}
+          name="mission"
+          placeholder="mission"
+          value={form.mission}
           onChange={handleChange}
           required
           className="w-full p-2.5 border border-slate-300 rounded-md resize-y min-h-25"
