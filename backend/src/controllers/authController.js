@@ -79,7 +79,7 @@ class AuthController {
       // Kirim data ke frontend
       return res.status(200).json({
         success: true,
-        user: {
+        data: {
           id: user.id,
           username: user.username,
           role: user.role,

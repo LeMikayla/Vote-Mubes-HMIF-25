@@ -1,6 +1,6 @@
 // Konfigurasi
 // ============================================
-const API_BASE_URL = "http://103.150.227.78:5173/:3000/api/votes";
+const API_BASE_URL = "http://localhost:3000/api/votes";
 let currentNIS = "";
 let selectedCandidate = null;
 
@@ -20,7 +20,7 @@ const confirmVoteBtn = document.getElementById("confirm-vote-btn");
 // Test koneksi ke server
 async function testConnection() {
   try {
-    const response = await fetch("http://103.150.227.78:5173/:3000/health");
+    const response = await fetch("http://localhost:3000/health");
     if (response.ok) {
       console.log("Terhubung ke server!");
       return true;

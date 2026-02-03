@@ -23,7 +23,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     // Sesuaikan URL frontend kamu (Vite biasanya di port 5173)
-    origin: process.env.CLIENT_URL || "http://103.150.227.78:5173",
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     methods: ["GET", "POST"],
   },
 });

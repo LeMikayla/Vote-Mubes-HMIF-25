@@ -87,7 +87,7 @@ services:
       # Security
       SESSION_SECRET: your-super-secret-key-change-this-in-production-123
       JWT_SECRET: jwt-secret-key-change-in-production-456
-      CORS_ORIGIN: http://103.150.227.78:5173/:5173
+      CORS_ORIGIN: http://localhost:8080
       
       # Rate Limiting
       RATE_LIMIT_WINDOW_MS: 900000
@@ -115,7 +115,7 @@ services:
           memory: 256M
           cpus: '0.5'
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://103.150.227.78:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
       interval: 30s
       timeout: 10s
       retries: 3

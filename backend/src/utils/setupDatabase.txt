@@ -1,0 +1,124 @@
+const { Pool } = require('pg');
+require('dotenv').config();
+const logger = require('../config/logger');
+
+async function setupDatabase() {
+  const adminPool = new Pool({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: 'postgres', // Gunakan user postgres untuk setup
+    password: process.env.DB_PASSWORD,
+    database: 'postgres'
+  });
+
+  try {
+    console.log('🔧 Setting up database...');
+    
+    // 1. Create database jika belum ada
+    try {
+      await adminPool.query(`CREATE DATABASE ${process.env.DB_NAME}`);
+      console.log(`✅ Database ${process.env.DB_NAME} created`);
+    } catch (err) {
+      if (err.code === '42P04') {
+        console.log(`⚠️  Database ${process.env.DB_NAME} already exists`);
+      } else {
+        throw err;
+      }
+    }
+
+    // 2. Create user jika belum ada
+    try {
+      await adminPool.query(`
+        CREATE USER ${process.env.DB_USER} 
+        WITH PASSWORD '${process.env.DB_PASSWORD}'
+      `);
+      console.log(`✅ User ${process.env.DB_USER} created`);
+    } catch (err) {
+      if (err.code === '42710') {
+        console.log(`⚠️  User ${process.env.DB_USER} already exists`);
+      }
+    }
+
+    // 3. Connect to votingdb
+    await adminPool.end();
+    
+    const votingPool = new Pool({
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    // 4. Create tables
+    await votingPool.query(`
+      CREATE TABLE IF NOT EXISTS candidates (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        class VARCHAR(20) NOT NULL,
+        vision TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    console.log('✅ Table candidates created');
+
+    await votingPool.query(`
+      CREATE TABLE IF NOT EXISTS votes (
+        id SERIAL PRIMARY KEY,
+        nis VARCHAR(20) NOT NULL,
+        candidate_id INTEGER REFERENCES candidates(id),
+        ip_address INET,
+        voted_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(nis)
+      );
+    `);
+    console.log('✅ Table votes created');
+
+    // 5. Create indexes untuk performa
+    await votingPool.query(`
+      CREATE INDEX IF NOT EXISTS idx_votes_nis ON votes(nis);
+      CREATE INDEX IF NOT EXISTS idx_votes_candidate_id ON votes(candidate_id);
+      CREATE INDEX IF NOT EXISTS idx_votes_voted_at ON votes(voted_at);
+    `);
+    console.log('✅ Indexes created');
+
+    // 6. Insert sample candidates jika kosong
+    const countResult = await votingPool.query('SELECT COUNT(*) FROM candidates');
+    if (parseInt(countResult.rows[0].count) === 0) {
+      await votingPool.query(`
+        INSERT INTO candidates (name, class, vision) VALUES
+        ('Ahmad Fauzi', 'XII IPA 1', 'Meningkatkan kualitas pembelajaran dan kegiatan ekstrakurikuler'),
+        ('Siti Nurhaliza', 'XII IPS 2', 'Memperkuat solidaritas dan kreativitas siswa'),
+        ('Rizky Pratama', 'XI IPA 3', 'Digitalisasi sistem sekolah dan pengembangan bakat'),
+        ('Dewi Lestari', 'XII IPA 2', 'Penguatan karakter dan lingkungan sekolah'),
+        ('Budi Santoso', 'XI IPS 1', 'Inovasi dalam kegiatan OSIS dan kepedulian sosial');
+      `);
+      console.log('✅ Sample candidates inserted');
+    }
+
+    // 7. Grant privileges
+    await votingPool.query(`
+      GRANT ALL PRIVILEGES ON DATABASE ${process.env.DB_NAME} TO ${process.env.DB_USER};
+      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${process.env.DB_USER};
+      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${process.env.DB_USER};
+    `);
+    console.log('✅ Privileges granted');
+
+    console.log('🎉 Database setup completed successfully!');
+    
+    await votingPool.end();
+    process.exit(0);
+    
+  } catch (error) {
+    console.error('❌ Database setup failed:', error.message);
+    logger.error('Database setup error:', error);
+    process.exit(1);
+  }
+}
+
+// Run setup jika file dijalankan langsung
+if (require.main === module) {
+  setupDatabase();
+}
+
+module.exports = setupDatabase;

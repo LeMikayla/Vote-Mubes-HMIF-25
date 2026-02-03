@@ -8,7 +8,7 @@ import { useAuth } from "../../hooks/useAuth.js";
 import { toast } from "sonner";
 
 const LoginForm = () => {
-  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [formData, setFormData] = useState({ npm: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
 
   const { login, loading } = useAuth();
@@ -20,21 +20,22 @@ const LoginForm = () => {
   };
 
   const handleLogin = async (e) => {
-    console.log("HANDLE LOGIN KEPAKAI");
     e.preventDefault();
 
-    if (!formData.username || !formData.password) {
-      toast.error("username dan kata sandi wajib diisi.");
+    if (!formData.npm || !formData.password) {
+      toast.error("NPM dan kata sandi wajib diisi.");
       return;
     }
-    const result = await login(formData.username, formData.password);
+    const result = await login(formData.npm, formData.password);
 
     if (result.success) {
-      if (result.user.role === "admin") {
+      const userRole = result.user?.role;
+
+      if (userRole === "admin") {
         toast.success("Login berhasil! Selamat datang Admin.");
         navigate("/admin/dashboardAdmin");
       } else {
-        toast.success(`Login berhasil! Selamat datang ${formData.username}.`);
+        toast.success(`Login berhasil! Selamat datang ${formData.npm}.`);
         navigate("/votes");
       }
     } else {
@@ -47,14 +48,14 @@ const LoginForm = () => {
       onSubmit={handleLogin}
       className="flex flex-col items-start gap-10 w-full mt-8"
     >
-      {/* --- INPUT username --- */}
+      {/* --- INPUT NPM --- */}
       <div className="flex flex-col items-start gap-1 w-full">
         <RomanInput
           iconSrc={Username}
-          placeholder="Masukkan username kamu"
+          placeholder="Masukkan NPM kamu"
           // Props penting agar bisa diketik:
-          name="username"
-          value={formData.username}
+          name="npm"
+          value={formData.npm}
           onChange={handleChange}
           disabled={loading} // Matikan input saat loading
         />
