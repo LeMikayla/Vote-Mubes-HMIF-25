@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const response = await authService.getMe();
+      console.log("GET ME RAW:", response);
       setUser(response.user);
       setRole(response.user.role);
       setToken(storedToken);

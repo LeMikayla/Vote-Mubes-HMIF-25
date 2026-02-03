@@ -4,14 +4,16 @@ import Loader from "../../../shared/components/loader.jsx";
 
 const ProtectedRoute = ({ allowedRoles = [] }) => {
   const { user, token, loading } = useAuth();
+  console.log("AUTH:", { user, token, loading });
+
   const location = useLocation();
 
   if (loading) {
     return <Loader />;
   }
 
-  if (!token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {

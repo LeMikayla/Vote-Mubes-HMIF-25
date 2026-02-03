@@ -28,6 +28,7 @@ export const router = createBrowserRouter([
         path: "/",
         element: <MainLayout />,
         children: [
+          { index: true, element: <Navigate to="votes" replace /> },
           { path: "votes", element: <Voting /> },
           { path: "results", element: <Result /> },
         ],

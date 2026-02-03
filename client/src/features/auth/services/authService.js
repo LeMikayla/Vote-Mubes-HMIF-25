@@ -8,6 +8,6 @@ export const authService = {
 
   getMe: async () => {
     const response = await Api.get("/auth/me");
-    return response.data;
+    return response.user;
   },
 };
