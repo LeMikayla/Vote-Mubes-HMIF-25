@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }) => {
 
     if (!storedToken) {
       setLoading(false);
+      setIsInitialized(true);
       return;
     }
 
@@ -31,6 +32,7 @@ export const AuthProvider = ({ children }) => {
       logout();
     } finally {
       setLoading(false);
+      setIsInitialized(true);
     }
   };
 
