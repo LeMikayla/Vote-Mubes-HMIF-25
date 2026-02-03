@@ -25,7 +25,7 @@ class UserModel {
   static async getAll() {
     try {
       const query = `
-        SELECT id, username, role, has_voted, voted_at 
+        SELECT id, username, email, role, has_voted, voted_at 
         FROM voters 
         ORDER BY id ASC
       `;
@@ -36,7 +36,7 @@ class UserModel {
     }
   }
 
-  static async markAsVoted(userId) {
+  static async markAsVoted(id) {
     try {
       const query = `
         UPDATE voters 
@@ -48,6 +48,45 @@ class UserModel {
       return result.rows[0];
     } catch (error) {
       throw error;
+    }
+  }
+
+  static async deleteAllVoters() {
+    const query = "DELETE FROM voters WHERE role != 'admin'";
+    await pool.query(query);
+    return true;
+  }
+
+  // Menerima array: [{username, email, password}, ...]
+  static async bulkCreate(users) {
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN"); // Mulai Transaksi
+
+      for (const user of users) {
+        // 1. Cek apakah username sudah ada? (Opsional, karena di DB biasanya sudah UNIQUE)
+        // Kita gunakan "ON CONFLICT DO NOTHING" biar kalau ada yg kembar, dia skip aja dan gak error.
+
+        const query = `
+          INSERT INTO voters (username, email, password, role) 
+          VALUES ($1, $2, $3, 'user')
+          ON CONFLICT (username) DO NOTHING
+        `;
+
+        // Pastikan password masuk (default 12345 jika kosong di excel)
+        const password = user.password || "12345";
+
+        await client.query(query, [user.username, user.email, password]);
+      }
+
+      await client.query("COMMIT"); // Simpan Permanen
+      return true;
+    } catch (error) {
+      await client.query("ROLLBACK"); // Batalkan jika ada error fatal
+      throw error;
+    } finally {
+      client.release();
     }
   }
 }

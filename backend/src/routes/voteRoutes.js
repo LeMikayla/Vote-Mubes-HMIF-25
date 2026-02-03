@@ -1,22 +1,26 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const VoteController = require('../controllers/voteController');
-const verifyToken = require('../middleware/authMiddleware');
+const VoteController = require("../controllers/voteController");
+const verifyToken = require("../middleware/authMiddleware");
+const { verifyAdmin } = require("../middleware/roleMiddleware");
 
-const { voteLimiter, resultsLimiter, apiLimiter } = require('../middleware/rateLimiter');
+const {
+  voteLimiter,
+  resultsLimiter,
+  apiLimiter,
+} = require("../middleware/rateLimiter");
 
 // Public routes
-router.get('/candidates', apiLimiter, VoteController.getCandidates);
-router.get('/results', resultsLimiter, VoteController.getResults);
-router.get('/statistics', apiLimiter, VoteController.getStatistics);
-router.get('/check/:nis', apiLimiter, VoteController.checkVoteStatus);
+router.get("/candidates", apiLimiter, VoteController.getCandidates);
+router.get("/results", resultsLimiter, VoteController.getResults);
+router.get("/statistics", apiLimiter, VoteController.getStatistics);
+router.get("/check/:nis", apiLimiter, VoteController.checkVoteStatus);
 
-
-router.post('/submit', verifyToken, VoteController.submitVote);
+router.post("/submit", verifyToken, VoteController.submitVote);
 
 // Cek status juga perlu diproteksi
-router.get('/check', verifyToken, VoteController.checkVoteStatus);
+router.get("/check", verifyToken, VoteController.checkVoteStatus);
 
-
+router.delete("/reset", verifyToken, verifyAdmin, VoteController.resetElection);
 
 module.exports = router;

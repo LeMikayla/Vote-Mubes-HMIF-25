@@ -137,6 +137,29 @@ class VoteController {
       return res.status(500).json({ message: "Gagal mengambil data kandidat" });
     }
   }
+
+  static async resetElection(req, res) {
+    try {
+      await VoteModel.resetElection();
+      
+      // OPTIONAL: Kirim sinyal ke socket biar grafik real-time langsung jadi 0
+      if (req.io) {
+        req.io.emit("vote_update", {
+          results: [], // Grafik kosong
+          statistics: { total_suara_masuk: 0, total_daftar_pemilih_tetap: 0 } // Statistik 0
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Pemilihan berhasil di-reset! Semua suara telah dihapus dan pemilih dapat memilih kembali." 
+      });
+
+    } catch (error) {
+      console.error("Reset Error:", error);
+      res.status(500).json({ message: "Gagal me-reset pemilihan." });
+    }
+  }
 }
 
 module.exports = VoteController;

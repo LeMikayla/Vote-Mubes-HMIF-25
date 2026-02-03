@@ -1,15 +1,16 @@
-const db = require('../config/database');
-const logger = require('../config/logger');
+const db = require("../config/database");
 
 class CandidateModel {
   // Get semua kandidat
   static async getAll() {
     try {
-      const query = 'SELECT id, name, class, vision FROM candidates ORDER BY id';
+      // 🔥 Update Select Query
+      const query =
+        "SELECT id, npm, name, vision, mission, image_url FROM candidates ORDER BY id";
       const result = await db.query(query);
       return result.rows;
     } catch (error) {
-      logger.error('Error getting candidates:', error);
+      // logger.error('Error getting candidates:', error);
       throw error;
     }
   }
@@ -17,30 +18,30 @@ class CandidateModel {
   // Get kandidat by ID
   static async getById(id) {
     try {
-      const query = 'SELECT id, name, class, vision FROM candidates WHERE id = $1';
+      // 🔥 Update Select Query
+      const query =
+        "SELECT id, npm, name, vision, mission, image_url FROM candidates WHERE id = $1";
       const result = await db.query(query, [id]);
       return result.rows[0];
     } catch (error) {
-      logger.error('Error getting candidate:', error);
       throw error;
     }
   }
 
-  // Tambah kandidat (atmin only lok ya)
-  static async create(name, classRoom, vision) {
+  // Tambah kandidat
+  static async create(npm, name, vision, mission, image_url) {
     try {
+      // 🔥 Update Insert Query
       const query = `
-        INSERT INTO candidates (name, class, vision) 
-        VALUES ($1, $2, $3) 
-        RETURNING id, name, class, vision
+        INSERT INTO candidates (npm, name, vision, mission, image_url) 
+        VALUES ($1, $2, $3, $4, $5) 
+        RETURNING *
       `;
-      const values = [name, classRoom, vision];
-      
+      const values = [npm, name, vision, mission, image_url];
+
       const result = await db.query(query, values);
-      logger.info(`Candidate created: ${name}`);
       return result.rows[0];
     } catch (error) {
-      logger.error('Error creating candidate:', error);
       throw error;
     }
   }
