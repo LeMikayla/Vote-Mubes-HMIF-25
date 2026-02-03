@@ -31,7 +31,7 @@ const LoginForm = () => {
 
       if (userRole === "admin") {
         toast.success("Login berhasil! Selamat datang Admin.");
-        navigate("/admin");
+        navigate("/admin/dashboardAdmin");
       } else {
         toast.success(`Login berhasil! Selamat datang ${formData.npm}.`);
         navigate("/vote");

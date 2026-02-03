@@ -15,19 +15,23 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     const storedToken = localStorage.getItem("token");
 
-    if (storedToken) {
-      try {
-        const response = await authService.getMe();
-        setUser(response.user);
-        setRole(response.user.role);
-        setToken(storedToken);
-      } catch (error) {
-        console.error("Token invalid/expired:", error);
-        toast.error("Sesi telah berakhir. Silakan login kembali.");
-        logout();
-      }
+    if (!storedToken) {
+      setLoading(false);
+      return;
     }
-    setIsInitialized(true);
+
+    try {
+      const response = await authService.getMe();
+      setUser(response.user);
+      setRole(response.user.role);
+      setToken(storedToken);
+    } catch (error) {
+      console.error("Token invalid/expired:", error);
+      toast.error("Sesi telah berakhir. Silakan login kembali.");
+      logout();
+    } finally {
+      setLoading(false);
+    }
   };
 
   const login = async (username, password) => {
