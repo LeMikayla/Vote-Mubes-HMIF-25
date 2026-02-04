@@ -59,10 +59,7 @@ function Result() {
           })}
         />
 
-        <ActionBar
-          onShare={() => toast.info("Fitur Share akan segera hadir!")}
-          onDownload={() => toast.info("Fitur Unduh akan segera hadir!")}
-        />
+        <ActionBar />
       </main>
 
       <footer className="text-center text-[10px] text-gray-500 font-serif tracking-wider uppercase opacity-60 pb-2">

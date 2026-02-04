@@ -13,7 +13,7 @@ export default function ResultCard({ chartData }) {
   )`;
 
   return (
-    <div className="w-full flex justify-center animate-fade-in">
+    <div className="w-full flex justify-center animate-fade-in ">
       <div className="relative w-75 h-77.5">
         {/* Layer 1: Drop Shadow */}
         <div

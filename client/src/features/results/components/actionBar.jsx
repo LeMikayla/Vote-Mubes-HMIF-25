@@ -1,8 +1,6 @@
-import { Share2, Download } from "lucide-react";
-
-export default function ActionBar({ onShare, onDownload }) {
+export default function ActionBar() {
   return (
-    <div className="w-full flex items-center justify-center gap-4 text-[#9D1016] mt-auto pb-4 animate-slide-up delay-100">
+    <div className="w-full flex items-center justify-center gap-4 text-[#9D1016] mt-10 pb-4 animate-slide-up delay-100">
       {/* Hiasan Kiri */}
       <div className="relative w-28.5 h-3.75">
         <div
@@ -14,26 +12,8 @@ export default function ActionBar({ onShare, onDownload }) {
         />
       </div>
 
-      {/* Tombol Share */}
-      <button
-        onClick={onShare}
-        className="flex flex-col items-center gap-2 hover:scale-110 transition-transform focus:outline-none"
-      >
-        <Share2 size={32} strokeWidth={2.2} />
-        <span className="text-[12px] font-serif tracking-widest">BAGIKAN</span>
-      </button>
-
       {/* Pemisah Tengah */}
       <div className="bg-[#9D1016] rotate-45 w-2.5 h-2.5" />
-
-      {/* Tombol Download */}
-      <button
-        onClick={onDownload}
-        className="flex flex-col items-center gap-2 hover:scale-110 transition-transform focus:outline-none"
-      >
-        <Download size={32} strokeWidth={2.2} />
-        <span className="text-[12px] font-serif tracking-widest">UNDUH</span>
-      </button>
 
       {/* Hiasan Kanan */}
       <div className="relative w-28.5 h-3.75">

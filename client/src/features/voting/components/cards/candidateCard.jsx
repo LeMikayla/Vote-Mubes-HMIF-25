@@ -31,14 +31,18 @@ const CandidateCard = ({ candidate, isActive, onClick }) => {
 
         {/* Quote */}
         <p className="font-serif italic text-gold-accent/80 text-[10px] text-center px-6 mb-4">
-          "{candidate.quote}"
+          "{candidate.vision}"
         </p>
 
         {/* Foto Kandidat */}
         <div className="flex-1 w-full relative mt-2">
           <div className="absolute bottom-0 left-0 w-full h-20 bg-linear-to-t from-royal-red to-transparent z-10" />
           <img
-            src={candidate.imageUrl}
+            src={
+              candidate.image_url
+                ? `${import.meta.env.VITE_STATIC_BASE_URL}${candidate.image_url}`
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.name)}`
+            }
             alt={candidate.name}
             className="w-full h-full object-cover object-top"
           />
