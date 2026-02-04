@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 // Gunakan Service yang sama dengan result.jsx sebelumnya
-import { voteService } from "../../voting/services/voteService";
+import { resultService } from "../services/resultService";
 import { electionService } from "../../voting/services/electionService";
 import { toast } from "sonner";
 
@@ -20,8 +20,8 @@ export const useStaticResult = () => {
       // Fetch 3 API sekaligus (Parallel)
       const [configRes, resultsRes, statsRes] = await Promise.all([
         electionService.getConfig(),
-        voteService.getResults(),
-        voteService.getStatistics(),
+        resultService.getVoteResults(),
+        resultService.getStatistics(),
       ]);
 
       // 1. Set Deadline

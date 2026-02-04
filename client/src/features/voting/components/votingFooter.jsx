@@ -30,7 +30,7 @@ export default function VotingFooter({ isDisabled, isLoading, onVote }) {
         </div>
       </div>
       
-      <div className="text-[10px] text-gray-700 font-serif tracking-wider uppercase opacity-80">
+      <div className="text-[10px] text-gray-500 font-serif tracking-wider uppercase opacity-80">
         © HMIF 2025 - Semua Hak Dilindungi
       </div>
     </footer>

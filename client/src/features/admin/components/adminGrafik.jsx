@@ -5,20 +5,22 @@ import Loader from "../../../shared/components/loader";
 export default function AdminGrafik() {
   const { results, stats, loading, isConnected } = useLiveResult();
 
-  // Helper Format Data (Tetap dibutuhkan untuk UI)
+  // Helper Format Data
   const formatChartData = (rawData) => {
-    if (!rawData) return [];
+    if (!rawData || rawData.length === 0) return [];
     return rawData.map((item) => ({
       name: item.name,
-      value: parseInt(item.total_votes, 10),
-      xLabel: parseInt(item.total_votes, 10),
-      avatar: item.image_url || `https://ui-avatars.com/api/?name=${item.name}`,
+      value: parseInt(item.total_votes, 10) || 0,
+      xLabel: parseInt(item.total_votes, 10) || 0,
+      avatar:
+        item.image_url ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}`,
     }));
   };
 
   const chartData = formatChartData(results);
 
-  // Jika loading awal, tampilkan loader (Opsional, atau biarkan render kosong dulu)
+  // Show loader while loading
   if (loading) return <Loader />;
 
   return (
@@ -47,10 +49,16 @@ export default function AdminGrafik() {
         </div>
       </div>
 
-      {/* Render Grafik */}
-      <div className="flex justify-center items-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-        <ResultCard chartData={chartData} />
-      </div>
+      {/* Show message if no data */}
+      {chartData.length === 0 ? (
+        <div className="flex justify-center items-center py-20 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+          <p className="text-gray-500">Belum ada data kandidat atau suara.</p>
+        </div>
+      ) : (
+        <div className="flex justify-center items-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+          <ResultCard chartData={chartData} />
+        </div>
+      )}
     </div>
   );
 }

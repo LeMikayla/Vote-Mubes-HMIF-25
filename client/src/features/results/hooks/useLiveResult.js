@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { socket } from "../../../lib/socket";
-import { resultService } from "../services/resultService"; 
-import { voteService } from "../../voting/services/voteService";
+import { resultService } from "../services/resultService";
 
 export const useLiveResult = () => {
   const [results, setResults] = useState([]);
@@ -9,67 +8,94 @@ export const useLiveResult = () => {
   const [loading, setLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
 
-  // 1. Fetch Data Awal (HTTP)
+  const listenersRegistered = useRef(false); // ✅ Prevent duplicate listeners
+
   const fetchInitialData = async () => {
     try {
       setLoading(true);
-      // Ambil Results & Stats bebarengan
       const [resData, statsData] = await Promise.all([
-        resultService.getVoteResults(), // Pastikan service ini benar
-        voteService.getStatistics(), // Pastikan service ini benar
+        resultService.getVoteResults(),
+        resultService.getStatistics(),
       ]);
 
-      setResults(resData.data || resData); // Handle jika response dibungkus .data
+      console.log("📊 Initial Results:", resData);
+      console.log("📈 Initial Stats:", statsData);
+
+      setResults(resData.data || resData);
 
       if (statsData.data) {
         setStats({
-          totalVotes: parseInt(statsData.data.total_suara_masuk, 10),
-          totalDPT: parseInt(statsData.data.total_daftar_pemilih_tetap, 10),
+          totalVotes: parseInt(statsData.data.total_suara_masuk, 10) || 0,
+          totalDPT:
+            parseInt(statsData.data.total_daftar_pemilih_tetap, 10) || 0,
         });
       }
     } catch (error) {
-      console.error("Gagal load initial data:", error);
+      console.error("❌ Gagal load initial data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // ✅ Prevent duplicate registration
+    if (listenersRegistered.current) {
+      console.log("⏭️ Listeners already registered");
+      return;
+    }
+
+    console.log("🎯 useLiveResult: Setting up listeners");
+    listenersRegistered.current = true;
+
     fetchInitialData();
 
-    // 2. Setup Socket
-    socket.connect();
+    const onConnect = () => {
+      console.log("✅ Socket connected in useLiveResult");
+      setIsConnected(true);
+    };
 
-    const onConnect = () => setIsConnected(true);
-    const onDisconnect = () => setIsConnected(false);
+    const onDisconnect = (reason) => {
+      console.log("❌ Socket disconnected in useLiveResult. Reason:", reason);
+      setIsConnected(false);
+    };
 
-    // 3. Dengarkan Event "vote_update"
+    const onConnectError = (error) => {
+      console.error("❌ Connection error:", error.message);
+      setIsConnected(false);
+    };
+
     const onVoteUpdate = (newData) => {
-      console.log("⚡ Update Socket:", newData);
+      console.log("⚡ Vote update received:", newData);
 
-      // Update Results
       if (newData.results) {
         setResults(newData.results);
       }
 
-      // Update Stats
       if (newData.statistics) {
         setStats({
-          totalVotes: parseInt(newData.statistics.total_suara_masuk, 10),
-          totalDPT: parseInt(newData.statistics.total_daftar_pemilih_tetap, 10),
+          totalVotes: parseInt(newData.statistics.total_suara_masuk, 10) || 0,
+          totalDPT:
+            parseInt(newData.statistics.total_daftar_pemilih_tetap, 10) || 0,
         });
       }
     };
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
+    socket.on("connect_error", onConnectError);
     socket.on("vote_update", onVoteUpdate);
 
+    // Check current connection status
+    setIsConnected(socket.connected);
+
     return () => {
+      console.log("🧹 useLiveResult: Cleaning up listeners");
+      listenersRegistered.current = false;
+
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
+      socket.off("connect_error", onConnectError);
       socket.off("vote_update", onVoteUpdate);
-      socket.disconnect();
     };
   }, []);
 

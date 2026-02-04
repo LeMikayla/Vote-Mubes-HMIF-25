@@ -7,33 +7,31 @@ const path = require("path");
 
 const ConfigModel = require("./src/models/configModel");
 
-// --- LIST ROUTES ---
-const authRoutes = require("./src/routes/authRoutes"); // Untuk Login
-const voteRoutes = require("./src/routes/voteRoutes"); // Untuk Voting & Recap
-const candidateRoutes = require("./src/routes/candidateRoutes"); // Untuk Admin CRUD Kandidat
+const authRoutes = require("./src/routes/authRoutes");
+const voteRoutes = require("./src/routes/voteRoutes");
+const candidateRoutes = require("./src/routes/candidateRoutes");
 const userRoutes = require("./src/routes/userRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 3. BUNGKUS EXPRESS DENGAN HTTP SERVER
-// (Ini wajib dilakukan agar WebSocket bisa berjalan di port yang sama)
 const server = http.createServer(app);
 
-// 4. INISIALISASI SOCKET.IO
+// ✅ SIMPLIFY Socket.IO config
 const io = new Server(server, {
   cors: {
-    // Sesuaikan URL frontend kamu (Vite biasanya di port 5173)
     origin: process.env.CLIENT_URL || "http://localhost:5173",
     methods: ["GET", "POST"],
+    credentials: true,
   },
+  // ✅ Tambahkan ini
+  allowEIO3: true,
+  transports: ["websocket", "polling"],
 });
 
-// --- MIDDLEWARE ---
-// ======================
 app.use(
   cors({
-    origin: "*", // Allow semua origin (matikan ini di production jika perlu strict)
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: false,
@@ -41,10 +39,7 @@ app.use(
 );
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Handle preflight requests
 app.options("*", cors());
-// Parsing JSON & URL Encoded
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -53,21 +48,47 @@ app.use((req, res, next) => {
   next();
 });
 
-io.on("connection", (socket) => {
-  console.log(`🔌 Client Terhubung: ${socket.id}`);
+// ❌ COMMENT ATAU HAPUS AUTH MIDDLEWARE INI DULU
+/*
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (token) {
+    next();
+  } else {
+    next(new Error("Authentication error"));
+  }
+});
+*/
 
-  socket.on("disconnect", () => {
-    console.log(`❌ Client Terputus: ${socket.id}`);
+// ✅ LANGSUNG KE CONNECTION HANDLER
+io.on("connection", (socket) => {
+  console.log(`✅ Client connected: ${socket.id}`);
+
+  // Log auth info if available
+  if (socket.handshake.auth && socket.handshake.auth.token) {
+    console.log(
+      `🔑 Token received: ${socket.handshake.auth.token.substring(0, 10)}...`,
+    );
+  }
+
+  socket.on("disconnect", (reason) => {
+    console.log(`❌ Client disconnected: ${socket.id}, Reason: ${reason}`);
   });
+
+  // Test emit
+  socket.emit("test", { message: "Connection successful!" });
 });
 
-// --- REGISTER ROUTES (PEMASANGAN KABEL) ---
-// ======================
+// Export function untuk broadcast
+global.broadcastVoteUpdate = (results, statistics) => {
+  console.log("📡 Broadcasting vote update to all clients");
+  io.emit("vote_update", { results, statistics });
+};
 
-// GET: Dipanggil oleh VotingPage.jsx & Admin Dashboard
+// Routes
 app.get("/api/election/config", async (req, res) => {
   try {
-    const config = await ConfigModel.getConfig(); // Ambil dari DB
+    const config = await ConfigModel.getConfig();
     res.json(config);
   } catch (error) {
     console.error("Error Get Config:", error);
@@ -75,12 +96,11 @@ app.get("/api/election/config", async (req, res) => {
   }
 });
 
-// PUT: Dipanggil oleh Admin untuk ubah jadwal
 app.put("/api/election/config", async (req, res) => {
   try {
-    const updatedConfig = await ConfigModel.updateConfig(req.body); // Simpan ke DB
-    io.emit("config_update", updatedConfig);
-    console.log("✅ Jadwal Updated di DB:", updatedConfig);
+    const updatedConfig = await ConfigModel.updateConfig(req.body);
+    io.emit("config_updated", updatedConfig);
+    console.log("✅ Config updated & broadcasted:", updatedConfig);
 
     res.json({
       success: true,
@@ -93,33 +113,20 @@ app.put("/api/election/config", async (req, res) => {
   }
 });
 
-// 1. Health Check (Cek denyut nadi server)
 app.get("/health", (req, res) => {
   res.json({
     status: "OK",
     message: "Server Voting Himpunan is running with PostgreSQL",
     timestamp: new Date().toISOString(),
+    socketConnections: io.engine.clientsCount,
   });
 });
 
-// 2. Auth Routes (Login)
 app.use("/api/auth", authRoutes);
-
-// 3. Vote Routes (Voting & Hasil)
 app.use("/api/votes", voteRoutes);
-
-// 4. Candidate Routes (Admin Only)
-// PERBAIKAN: Baris ini harus ditaruh SEBELUM Error Handling 404
 app.use("/api/candidates", candidateRoutes);
-
-// 5. User Routes (Admin Only)
 app.use("/api/users", userRoutes);
 
-// --- ERROR HANDLING (SATPOL PP) ---
-// ======================
-
-// 1. Handler 404 (Route Tidak Ditemukan)
-// Ini menangkap semua request yang URL-nya tidak cocok dengan route di atas
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
@@ -127,10 +134,8 @@ app.use((req, res, next) => {
   });
 });
 
-// 2. Global Error Handler (Handler 500)
-// Ini menangkap error coding (misal: variable not defined) biar server gak crash/mati
 app.use((err, req, res, next) => {
-  console.error("🔥 TERJADI ERROR DI SERVER:", err.stack);
+  console.error("🔥 ERROR:", err.stack);
   res.status(500).json({
     success: false,
     message: "Terjadi kesalahan internal pada server.",
@@ -138,20 +143,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// --- START SERVER ---
-// ======================
 server.listen(PORT, () => {
   console.log(`==========================================`);
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🔌 Socket.io active`);
+  console.log(`🔌 Socket.io ready at ws://localhost:${PORT}`);
   console.log(`------------------------------------------`);
-  console.log(`Health Check: GET  http://localhost:${PORT}/health`);
-  console.log(
-    `Config:       GET  http://localhost:${PORT}/api/election/config`,
-  );
-  console.log(`Login:        POST http://localhost:${PORT}/api/auth/login`);
-  console.log(`Candidates:   GET  http://localhost:${PORT}/api/candidates`);
-  console.log(`Voting:       POST http://localhost:${PORT}/api/votes/submit`);
+  console.log(`Health: GET http://localhost:${PORT}/health`);
   console.log(`==========================================`);
 });
 

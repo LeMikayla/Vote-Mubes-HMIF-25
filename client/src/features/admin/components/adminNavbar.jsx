@@ -45,7 +45,7 @@ export default function AdminNavbar({ setPage, currentPage }) {
                 <Users size={16} /> Data Pemilih
               </button>
 
-              <button onClick={() => setPage("graphics")} className={getNavClass("graphics")}>
+              <button onClick={() => setPage("grafik")} className={getNavClass("graphics")}>
                 <PieChart size={16} /> Grafik
               </button>
 

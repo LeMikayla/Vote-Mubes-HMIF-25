@@ -7,6 +7,8 @@ import { useCountdown } from "../../../shared/hooks/useCountdown";
 import {
   ConfirmContent,
   SuccessContent,
+  LoginWarningContent,
+  VotingWarningContent,
 } from "../../../shared/components/modal/content";
 import { DiamondIcon } from "../components/icons/mergedIcon";
 
@@ -137,8 +139,15 @@ function Voting() {
             {modal === "success" && (
               <SuccessContent
                 onCancel={() => setModal(null)}
-                onConfirm={() => (window.location.href = "/live-count")}
+                onConfirm={() => (window.location.href = "/results")}
               />
+            )}
+            {modal === "login-warning" && (
+              <LoginWarningContent onCancel={() => setModal(null)} />
+            )}
+
+            {modal === "voting-warning" && (
+              <VotingWarningContent onCancel={() => setModal(null)} />
             )}
           </div>
         </>
