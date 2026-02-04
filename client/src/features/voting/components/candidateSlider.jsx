@@ -2,11 +2,15 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
-import CandidateCard from "./cards/candidateCard"; 
+import CandidateCard from "./cards/candidateCard";
 
-export default function CandidateSlider({ candidates, setSwiperRef, onSlideChange }) {
+export default function CandidateSlider({
+  candidates,
+  setSwiperRef,
+  onSlideChange,
+}) {
   return (
-    <div className="w-full relative flex items-center justify-center pb-6 shrink-0 h-85">
+    <div className="w-full relative flex items-center justify-center pb-12 flex-1 overflow-visible">
       <Swiper
         modules={[EffectCoverflow]}
         effect={"coverflow"}
@@ -21,13 +25,15 @@ export default function CandidateSlider({ candidates, setSwiperRef, onSlideChang
           modifier: 1,
           slideShadows: false,
         }}
-        // Kita kirim instance swiper ke parent biar bisa dikontrol indicator
-        onSwiper={setSwiperRef} 
+        onSwiper={setSwiperRef}
         onSlideChange={(swiper) => onSlideChange(swiper.activeIndex)}
-        className="w-full h-full overflow-visible! py-4"
+        className="w-full h-full overflow-visible py-4"
       >
-        {candidates.map((candidate, index) => (
-          <SwiperSlide key={candidate.id} className="w-70! flex! items-center justify-center">
+        {candidates.map((candidate) => (
+          <SwiperSlide
+            key={candidate.id}
+            className="w-[170px]! flex! items-center justify-center"
+          >
             {({ isActive }) => (
               <div
                 className={`transition-all duration-300 ease-out ${

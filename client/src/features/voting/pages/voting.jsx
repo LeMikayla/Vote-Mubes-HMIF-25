@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom"; // ← TAMBAHKAN INI
 import { electionService } from "../services/electionService";
 import { candidateService } from "../services/candidateService";
 import { voteService } from "../services/voteService";
@@ -8,11 +7,10 @@ import { useCountdown } from "../../../shared/hooks/useCountdown";
 import {
   ConfirmContent,
   SuccessContent,
-  LoginWarningContent,
-  VotingWarningContent,
 } from "../../../shared/components/modal/content";
 import { DiamondIcon } from "../components/icons/mergedIcon";
 
+// --- IMPORT KOMPONEN BARU ---
 import VotingHeader from "../components/votingHeader";
 import CandidateSlider from "../components/candidateSlider";
 import VotingFooter from "../components/votingFooter";
@@ -20,8 +18,7 @@ import Loader from "../../../shared/components/loader";
 import { toast } from "sonner";
 
 function Voting() {
-  const location = useLocation(); // ← TAMBAHKAN INI
-
+  // --- STATE ---
   const [candidates, setCandidates] = useState([]);
   const [deadline, setDeadline] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,9 +26,11 @@ function Voting() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [modal, setModal] = useState(null);
 
+  // Ref untuk mengontrol slider dari indikator diamond
   const swiperRef = useRef(null);
   const timeLeftObj = useCountdown(deadline);
 
+  // --- LOGIC ---
   const formatTimeText = () => {
     if (!timeLeftObj) return "DITUTUP";
     const { hours, minutes, seconds } = timeLeftObj;
@@ -58,15 +57,6 @@ function Voting() {
     initData();
   }, []);
 
-  // ✅ TAMBAHKAN INI - Cek apakah ada warning dari redirect
-  useEffect(() => {
-    if (location.state?.showWarning) {
-      setModal("voting-warning");
-      // Clear state setelah ditampilkan
-      window.history.replaceState({}, document.title);
-    }
-  }, [location]);
-
   const handleVote = async () => {
     const selectedCandidate = candidates[activeIndex];
     if (!selectedCandidate) return;
@@ -87,8 +77,11 @@ function Voting() {
 
   return (
     <>
-      <main className="flex-1 flex flex-col items-center justify-center min-h-0">
+      <main className="flex-1 flex flex-col items-center">
+        {/* 1. Header */}
         <VotingHeader timeLeftText={formatTimeText()} />
+
+        {/* 2. Slider */}
         <CandidateSlider
           candidates={candidates}
           setSwiperRef={(swiper) => {
@@ -96,7 +89,9 @@ function Voting() {
           }}
           onSlideChange={setActiveIndex}
         />
-        <div className="flex space-x-3 mt-2 shrink-0 z-20">
+
+        {/* 3. Diamond Indicators */}
+        <div className="flex space-x-3 shrink-0 mb-4">
           {candidates.map((_, idx) => (
             <button
               key={idx}
@@ -105,17 +100,14 @@ function Voting() {
             >
               <DiamondIcon
                 filled={idx === activeIndex}
-                className={`transition-colors duration-300 ${
-                  idx === activeIndex
-                    ? "bg-royal-red"
-                    : "bg-transparent border-royal-red"
-                }`}
+                className="transition-colors duration-300"
               />
             </button>
           ))}
         </div>
       </main>
 
+      {/* 4. Footer */}
       <VotingFooter
         isDisabled={!timeLeftObj || submitting}
         isLoading={submitting}
@@ -143,12 +135,6 @@ function Voting() {
                 onCancel={() => setModal(null)}
                 onConfirm={() => (window.location.href = "/results")}
               />
-            )}
-            {modal === "login-warning" && (
-              <LoginWarningContent onCancel={() => setModal(null)} />
-            )}
-            {modal === "voting-warning" && (
-              <VotingWarningContent onCancel={() => setModal(null)} />
             )}
           </div>
         </>

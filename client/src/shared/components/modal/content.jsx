@@ -42,7 +42,7 @@ export function SuccessContent({ onCancel, onConfirm }) {
 
   const handleConfirm = () => {
     if (onConfirm) onConfirm();
-    navigate("/live-count"); // Default redirect
+    navigate("/results"); // Default redirect
   };
 
   return (

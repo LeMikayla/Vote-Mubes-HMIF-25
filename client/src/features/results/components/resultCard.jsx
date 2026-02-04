@@ -3,6 +3,17 @@ import VoteChart from "./voteChart";
 export default function ResultCard({ chartData }) {
   const cs = 12; // Corner Size (Ukuran potongan sudut)
 
+  // 🔥 Dynamic card width based on number of candidates
+  const candidateCount = chartData.length;
+  const cardWidth =
+    candidateCount <= 3
+      ? 75
+      : candidateCount === 4
+        ? 80
+        : candidateCount === 5
+          ? 85
+          : 90; // 6 candidates (in Tailwind units)
+
   // Definisi ClipPath agar tidak berulang
   const cardClipPath = `polygon(
     0 ${cs}px, ${cs}px ${cs}px, ${cs}px 0,
@@ -13,8 +24,11 @@ export default function ResultCard({ chartData }) {
   )`;
 
   return (
-    <div className="w-full flex justify-center animate-fade-in ">
-      <div className="relative w-75 h-77.5">
+    <div className="w-full flex justify-center animate-fade-in">
+      <div
+        className="relative h-77.5 transition-all duration-500"
+        style={{ width: `${cardWidth * 4}px` }} // Convert Tailwind units to px
+      >
         {/* Layer 1: Drop Shadow */}
         <div
           className="absolute inset-0 bg-[#F5AB39] opacity-50 translate-y-2"

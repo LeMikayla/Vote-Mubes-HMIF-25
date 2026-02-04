@@ -71,10 +71,9 @@ export default function DaftarPemilih() {
     const templateData = [
       {
         Username: "fefesj",
-        Email: "mhs1@unpad.ac.id",
         Password: "12345",
       },
-      { Username: "fesed", Email: "mhs2@unpad.ac.id", Password: "12345" },
+      { Username: "fesed", Password: "12345" },
     ];
 
     const ws = XLSX.utils.json_to_sheet(templateData);
@@ -109,7 +108,6 @@ export default function DaftarPemilih() {
             username: String(
               row.Username || row.username || row.NPM || row.npm || "",
             ).trim(),
-            email: String(row.Email || row.email || "").trim(),
             password: String(row.Password || row.password || "12345"),
           }))
           .filter((user) => user.username !== "");
