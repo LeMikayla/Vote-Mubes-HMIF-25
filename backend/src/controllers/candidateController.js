@@ -1,4 +1,5 @@
 const pool = require("../config/database");
+const runCleanup = require("../utils/cleanup");
 
 class CandidateController {
   static async getAllCandidates(req, res) {
@@ -86,6 +87,8 @@ class CandidateController {
         [npm, name, number, vision, mission, image_url, id],
       );
 
+      runCleanup();
+
       res.json({
         success: true,
         message: "Data kandidat berhasil diupdate",
@@ -109,6 +112,7 @@ class CandidateController {
     const { id } = req.params;
     try {
       await pool.query("DELETE FROM candidates WHERE id = $1", [id]);
+      runCleanup();
       res.json({ success: true, message: "Kandidat berhasil dihapus" });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });

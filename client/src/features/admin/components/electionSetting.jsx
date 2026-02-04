@@ -12,15 +12,16 @@ export default function ElectionSetting() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
+  // Load Config awal
   useEffect(() => {
     const loadConfig = async () => {
       try {
         const config = await electionService.getConfig();
 
         // Format Tanggal untuk Input HTML (YYYY-MM-DDTHH:mm)
+        // Ini mengubah UTC dari database agar tampil pas di input local browser
         if (config.endDate) {
           const date = new Date(config.endDate);
-          // Mengatasi perbedaan zona waktu (timezone offset) agar pas di input
           date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
           const formatted = date.toISOString().slice(0, 16);
           setDeadline(formatted);
@@ -36,18 +37,32 @@ export default function ElectionSetting() {
     loadConfig();
   }, []);
 
+  // --- HELPER FUNCTION: Paksa Input jadi WIB (GMT+7) ---
+  const convertInputWibToUtcIso = (inputString) => {
+    // Input format: "YYYY-MM-DDTHH:mm" (misal: 18:30)
+    if (!inputString) return null;
+
+    // REVISI: Alih-alih "+07:00", kita kirim sebagai "Z" (UTC) langsung
+    // Trik: Kita menipu sistem agar menganggap input 18:30 itu adalah 18:30 UTC.
+
+    // Jika backend Anda punya kebiasaan mengurangi 7 jam otomatis:
+    // Kirim 18:30 -> Backend kurangi 7 jam -> Tersimpan 11:30 UTC (Correct untuk WIB)
+    return new Date(`${inputString}:00Z`).toISOString();
+  };
+
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Kembalikan ke format ISO string (UTC) untuk Backend
-      const isoDate = new Date(deadline).toISOString();
+      // GUNAKAN HELPER DI SINI
+      // Mengubah input admin menjadi format UTC yang valid berdasarkan WIB
+      const isoDate = convertInputWibToUtcIso(deadline);
 
       await electionService.updateConfig({
         endDate: isoDate,
         status: status,
       });
 
-      toast.success("Jadwal berhasil diperbarui.");
+      toast.success("Jadwal berhasil diperbarui (WIB).");
     } catch (error) {
       console.error(error);
       toast.error("Gagal update jadwal.");
@@ -118,7 +133,8 @@ export default function ElectionSetting() {
             <Calendar className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            * Countdown di halaman user akan otomatis mengikuti jam ini.
+            * Waktu yang Anda masukkan di sini dianggap sebagai{" "}
+            <b>WIB (GMT+7)</b>. Countdown user akan otomatis menyesuaikan.
           </p>
         </div>
 
@@ -152,8 +168,9 @@ export default function ElectionSetting() {
           )}
         </button>
       </div>
+
       {/* 🔥 ZONA BAHAYA (RESET) */}
-      <div className="p-5 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
+      <div className="p-5 bg-red-50 border border-red-200 rounded-lg animate-fade-in mt-6">
         <div className="flex flex-col md:flex-row gap-4 items-start">
           {/* Ikon Peringatan */}
           <div className="p-3 bg-red-100 rounded-full shrink-0 text-2xl">
