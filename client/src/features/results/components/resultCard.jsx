@@ -1,10 +1,11 @@
 import VoteChart from "./voteChart";
 
-export default function ResultCard({ chartData }) {
-  const cs = 12; // Corner Size (Ukuran potongan sudut)
+export default function ResultCard({ chartData, isFullSize = false }) {
+  const cs = 12; // Corner Size
 
-  // 🔥 Dynamic card width based on number of candidates
+  // --- LOGIKA LAMA (Untuk Tampilan User) ---
   const candidateCount = chartData.length;
+  // Ini logika lebar manual yang Anda pakai sebelumnya
   const cardWidth =
     candidateCount <= 3
       ? 75
@@ -12,9 +13,9 @@ export default function ResultCard({ chartData }) {
         ? 80
         : candidateCount === 5
           ? 85
-          : 90; // 6 candidates (in Tailwind units)
+          : 90;
 
-  // Definisi ClipPath agar tidak berulang
+  // --- CLIP PATH (Sama untuk keduanya) ---
   const cardClipPath = `polygon(
     0 ${cs}px, ${cs}px ${cs}px, ${cs}px 0,
     calc(100% - ${cs}px) 0, calc(100% - ${cs}px) ${cs}px, 100% ${cs}px,
@@ -23,12 +24,20 @@ export default function ResultCard({ chartData }) {
     ${cs}px calc(100% - ${cs}px), 0 calc(100% - ${cs}px)
   )`;
 
+  // Tentukan Style berdasarkan Mode
+  const containerClass = isFullSize
+    ? "relative w-full h-full transition-all duration-500" // Mode Admin (Full)
+    : "relative h-77.5 transition-all duration-500"; // Mode User (Fixed Height)
+
+  const containerStyle = isFullSize
+    ? {} // Mode Admin (Ikut Parent)
+    : { width: `${cardWidth * 4}px` }; // Mode User (Lebar Manual)
+
   return (
-    <div className="w-full flex justify-center animate-fade-in">
-      <div
-        className="relative h-77.5 transition-all duration-500"
-        style={{ width: `${cardWidth * 4}px` }} // Convert Tailwind units to px
-      >
+    <div
+      className={`flex justify-center animate-fade-in ${isFullSize ? "w-full h-full" : "w-full"}`}
+    >
+      <div className={containerClass} style={containerStyle}>
         {/* Layer 1: Drop Shadow */}
         <div
           className="absolute inset-0 bg-[#F5AB39] opacity-50 translate-y-2"
@@ -60,8 +69,11 @@ export default function ResultCard({ chartData }) {
             )`,
           }}
         >
-          {/* Panggil Grafik Disini */}
-          <VoteChart data={chartData} />
+          {/* Grafik Chart */}
+          <div className="w-full h-full p-2">
+            {/* 🔥 TAMBAHKAN PROPS isFullSize KE SINI */}
+            <VoteChart data={chartData} isFullSize={isFullSize} />
+          </div>
         </div>
       </div>
     </div>

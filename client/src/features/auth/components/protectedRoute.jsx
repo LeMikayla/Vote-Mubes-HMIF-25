@@ -8,51 +8,58 @@ const ProtectedRoute = ({ allowedRoles = [], requireVoting = false }) => {
   const { user, token, loading } = useAuth();
   const location = useLocation();
   const [hasVoted, setHasVoted] = useState(null);
-  const [checkingVote, setCheckingVote] = useState(requireVoting);
 
-  console.log({ user, token, loading });
+  const isVotingCheckPending = requireVoting && hasVoted === null;
 
-  // ✅ Cek status voting jika diperlukan
   useEffect(() => {
+    if (loading) return;
+
     const checkVotingStatus = async () => {
+      // Validasi ketat: jika tidak ada user.username, anggap false biar gak loading selamanya
       if (!requireVoting || !user?.username) {
-        setCheckingVote(false);
+        if (requireVoting && !user?.username) setHasVoted(false); // Fallback
         return;
       }
 
       try {
         const userData = await userServices.getUserByUsername(user.username);
-        setHasVoted(userData.has_voted);
+        setHasVoted(!!userData.has_voted);
       } catch (error) {
         console.error("Error checking voting status:", error);
         setHasVoted(false);
-      } finally {
-        setCheckingVote(false);
       }
     };
 
-    if (!loading && token && user) {
+    if (token && user) {
       checkVotingStatus();
     }
   }, [user, token, loading, requireVoting]);
 
-  // Loading state
-  if (loading || checkingVote) {
+  // 1. LOADING AUTH (Paling Pertama)
+  if (loading) {
     return <Loader />;
   }
 
-  // Auth check
+  // 2. CEK TOKEN (Belum Login)
   if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Role check
+  // 3. 🔥 CEK ROLE DULUAN (Pindahkan ke Sini) 🔥
+  // Kalau role salah, langsung tendang. Jangan pedulikan loading voting.
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/" replace />;
+    // Pastikan diarahkan ke halaman PUBLIC atau UNAUTHORIZED agar tidak loop
+    return <Navigate to="/login" replace />; 
   }
 
-  // ✅ Voting check (hanya untuk route yang requireVoting=true)
-  if (requireVoting && !hasVoted) {
+  // 4. BARU CEK LOADING VOTING
+  // Jika role sudah benar, baru kita tunggu proses cek voting
+  if (isVotingCheckPending) {
+    return <Loader />;
+  }
+
+  // 5. CEK STATUS VOTING
+  if (requireVoting && hasVoted === false) {
     return <Navigate to="/votes" state={{ showWarning: true }} replace />;
   }
 

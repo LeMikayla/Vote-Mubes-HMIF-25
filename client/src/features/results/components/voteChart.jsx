@@ -1,103 +1,134 @@
 import Pillar from "./pillar";
 
-// Helper untuk hitung tinggi dinamis
-const getHeight = (value, minValue, maxValue) => {
-  const minHeight = 45;
-  const maxHeight = 130;
+export default function VoteChart({ data, isFullSize = false }) {
+  // --- KONFIGURASI TINGGI ---
+  // Min Height User: 20px (Sangat pendek saat 0 vote)
+  const minHeight = isFullSize ? 25 : 20;
+  const maxHeight = isFullSize ? 450 : 130;
 
-  if (maxValue === minValue) return minHeight;
-
-  return (
-    minHeight +
-    ((value - minValue) / (maxValue - minValue)) * (maxHeight - minHeight)
-  );
-};
-
-export default function VoteChart({ data }) {
   const values = data.map((d) => d.value);
-  const maxValue = Math.max(...values, 100);
-  const minValue = Math.min(...values, 0);
+  const actualMax = Math.max(...values);
+  const visualMax = Math.max(actualMax, 200);
 
-  // 🔥 Dynamic sizing based on number of candidates
+  const getHeight = (value) => {
+    const percentage = value / visualMax;
+    return minHeight + percentage * (maxHeight - minHeight);
+  };
+
+  // --- KONFIGURASI LEBAR & JARAK (GAP) ---
   const candidateCount = data.length;
+  let pillarWidth, gap;
 
-  // Calculate pillar width: fewer candidates = wider pillars
-  const pillarWidth =
-    candidateCount <= 3
-      ? 50
-      : candidateCount === 4
-        ? 42
-        : candidateCount === 5
-          ? 36
-          : 32; // 6 candidates
+  if (isFullSize) {
+    // === ADMIN MODE (Layar Lebar) ===
+    if (candidateCount <= 3) {
+      pillarWidth = 75;
+      gap = 112;
+    } else if (candidateCount === 5) {
+      pillarWidth = 54;
+      gap = 84;
+    } else if (candidateCount >= 6) {
+      pillarWidth = 48;
+      gap = 70;
+    } else {
+      pillarWidth = 63;
+      gap = 98;
+    }
+  } else {
+    // === USER MODE (HP) - Versi Lebih Kecil ===
+    // Pilar dikecilkan (20px - 32px) agar avatar w-9 (36px) terlihat seimbang
+    if (candidateCount <= 3) {
+      pillarWidth = 32;
+      gap = 48;
+    } else if (candidateCount === 5) {
+      pillarWidth = 24;
+      gap = 32;
+    } else if (candidateCount >= 6) {
+      pillarWidth = 20;
+      gap = 24;
+    } else {
+      pillarWidth = 30;
+      gap = 40;
+    } // Default 4 kandidat
+  }
 
-  // Calculate gap: increased for better spacing
-  const gap =
-    candidateCount <= 3
-      ? 32
-      : candidateCount === 4
-        ? 28
-        : candidateCount === 5
-          ? 24
-          : 20; // 6 candidates
-
-  // Calculate baseline width dynamically
+  // --- POSISI ELEMEN ---
   const baselineWidth =
-    pillarWidth * candidateCount + gap * (candidateCount - 1) + 40;
+    pillarWidth * candidateCount +
+    gap * (candidateCount - 1) +
+    (isFullSize ? 150 : 60);
+
+  const baselineBottom = isFullSize ? 80 : 48;
+  const pillarBottom = baselineBottom + (isFullSize ? 8 : 6);
+  const numberBottom = baselineBottom - (isFullSize ? 35 : 16);
+  const labelBottom = isFullSize ? 20 : 2;
+
+  const axisLabel = "Jumlah Vote";
 
   return (
-    <div className="w-full h-full relative p-4">
-      {/* BASELINE (Centered) - Dynamic width */}
+    <div className="w-full h-full relative p-4 flex justify-center items-end pb-4">
+      {/* BASELINE */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 bg-[#F5AB39] rounded-sm h-1.5 z-10"
+        className="absolute bg-[#F5AB39] rounded-sm z-10 transition-all duration-500"
         style={{
           width: `${baselineWidth}px`,
-          bottom: "48px",
+          height: isFullSize ? "8px" : "6px",
+          bottom: `${baselineBottom}px`,
         }}
       />
 
-      {/* Pillars - Now aligned to baseline with flex-end */}
+      {/* PILLARS CONTAINER */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 flex items-end z-20"
+        className="absolute flex items-end z-20 transition-all duration-500"
         style={{
-          bottom: "54px", // Same as baseline - pillars sit ON the line
+          bottom: `${pillarBottom}px`,
           gap: `${gap}px`,
         }}
       >
         {data.map((item, i) => (
           <Pillar
             key={i}
-            height={getHeight(item.value, minValue, maxValue)}
+            height={getHeight(item.value)}
             name={item.name}
             avatar={item.avatar}
             width={pillarWidth}
+            isFullSize={isFullSize}
           />
         ))}
       </div>
 
-      {/* Vote Numbers - Dynamic gap */}
+      {/* ANGKA VOTE */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 flex z-20"
+        className="absolute flex z-20 transition-all duration-500"
         style={{
-          bottom: "32px",
+          bottom: `${numberBottom}px`,
           gap: `${gap}px`,
         }}
       >
         {data.map((item, i) => (
           <span
             key={i}
-            className="text-white font-serif text-xs text-center font-bold"
-            style={{ width: `${pillarWidth}px` }}
+            className="text-white font-serif text-center font-bold"
+            style={{
+              width: `${pillarWidth}px`,
+              fontSize: isFullSize ? "18px" : "10px", // Font angka juga dikecilkan (10px)
+            }}
           >
             {item.xLabel}
           </span>
         ))}
       </div>
 
-      {/* X-axis Title */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-center">
-        <span className="text-[#F5AB39] font-serif text-[10px] tracking-wider uppercase">
-          Jumlah Vote
+      {/* JUDUL AXIS */}
+      <div
+        className="absolute text-center"
+        style={{ bottom: `${labelBottom}px` }}
+      >
+        <span
+          className="text-[#F5AB39] font-serif tracking-wider uppercase"
+          style={{ fontSize: isFullSize ? "14px" : "10px" }}
+        >
+          {axisLabel}
         </span>
       </div>
     </div>
