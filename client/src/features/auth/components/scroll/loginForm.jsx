@@ -56,7 +56,7 @@ const LoginForm = () => {
       <div className="flex flex-col items-start gap-1 w-full">
         <RomanInput
           iconSrc={Username}
-          placeholder="Masukkan NPM kamu"
+          placeholder="Masukkan username kamu"
           name="npm"
           value={formData.npm}
           onChange={handleChange}

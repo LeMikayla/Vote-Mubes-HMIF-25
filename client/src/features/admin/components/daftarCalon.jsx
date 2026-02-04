@@ -86,6 +86,9 @@ export default function DaftarCalon({ onTambah, onEdit }) {
               />
 
               <div className="flex-1">
+                <h3 className="text-xl font-semibold text-amber-700">
+                  No: {c.number}
+                </h3>
                 <h3 className="text-lg font-semibold">{c.name}</h3>
                 <small className="text-gray-500">NPM: {c.npm}</small>
                 <p className="mt-2 line-clamp-2">

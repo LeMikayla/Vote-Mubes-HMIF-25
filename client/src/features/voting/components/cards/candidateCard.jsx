@@ -50,9 +50,7 @@ const CandidateCard = ({ candidate, isActive, onClick }) => {
       </div>
 
       {/* BAGIAN BADGE NOMOR */}
-      <NumberBadge
-        numberImage={candidate.numberImageUrl || "/images/number.png"}
-      />
+      <NumberBadge number={candidate.number} />
     </RomanCardFrame>
   );
 };

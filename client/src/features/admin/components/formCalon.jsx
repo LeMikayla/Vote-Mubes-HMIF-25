@@ -6,6 +6,7 @@ export default function FormCalon({ calon, onBack }) {
   const [form, setForm] = useState({
     name: "",
     npm: "",
+    number: "",
     vision: "",
     mission: "",
     foto: null,
@@ -18,6 +19,7 @@ export default function FormCalon({ calon, onBack }) {
       setForm({
         name: calon.name || "",
         npm: calon.npm || "",
+        number: calon.number || "",
         vision: calon.vision || "",
         mission: calon.mission || "",
         foto: calon.image_url || null,
@@ -52,6 +54,7 @@ export default function FormCalon({ calon, onBack }) {
       const formData = new FormData();
       formData.append("name", form.name);
       formData.append("npm", form.npm);
+      formData.append("number", form.number);
       formData.append("vision", form.vision);
       formData.append("mission", form.mission);
 
@@ -108,6 +111,15 @@ export default function FormCalon({ calon, onBack }) {
           name="npm"
           placeholder="NPM"
           value={form.npm}
+          onChange={handleChange}
+          required
+          className="w-full p-2.5 border border-slate-300 rounded-md"
+        />
+
+        <input
+          name="number"
+          placeholder="No."
+          value={form.number}
           onChange={handleChange}
           required
           className="w-full p-2.5 border border-slate-300 rounded-md"

@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: "RomanFont7";
+  /* Pastikan path-nya benar sesuai lokasi file kamu */
+  src: url("../fonts/roman_font_7.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@theme {
+  /* Nama variable '--font-roman' akan otomatis jadi class 'font-roman' */
+  --font-roman: "RomanFont7", serif; 
+}
