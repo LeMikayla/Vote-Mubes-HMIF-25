@@ -20,4 +20,9 @@ export const userServices = {
     const response = await Api.delete("/users/all");
     return response.data;
   },
+
+  importUsers: async (users) => {
+    const response = await Api.post("/users/import", { users });
+    return response.data;
+  },
 };

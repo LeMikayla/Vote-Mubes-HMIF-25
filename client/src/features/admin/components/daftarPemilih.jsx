@@ -72,9 +72,9 @@ export default function DaftarPemilih() {
       {
         Username: "fefesj",
         Email: "mhs1@unpad.ac.id",
-        Password: "12345(Opsional)",
+        Password: "12345",
       },
-      { Username: "fesed", Email: "mhs2@unpad.ac.id", Password: "" },
+      { Username: "fesed", Email: "mhs2@unpad.ac.id", Password: "12345" },
     ];
 
     const ws = XLSX.utils.json_to_sheet(templateData);
@@ -91,14 +91,12 @@ export default function DaftarPemilih() {
 
     reader.onload = async (evt) => {
       try {
-        const binaryStr = evt.target.result;
-        const workbook = XLSX.read(binaryStr, { type: "binary" });
+        const arrayBuffer = evt.target.result;
+        const workbook = XLSX.read(arrayBuffer, { type: "array" }); // ← UBAH INI
 
-        // Ambil sheet pertama
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
 
-        // Konversi ke JSON
         const rawData = XLSX.utils.sheet_to_json(sheet);
 
         if (rawData.length === 0) {
@@ -106,17 +104,21 @@ export default function DaftarPemilih() {
           return;
         }
 
-        // Mapping Data (Sesuaikan Header Excel -> Key Database)
-        // Kita paksa formatnya biar sesuai backend
         const formattedData = rawData
           .map((row) => ({
-            username: String(row.NPM || row.npm || row.Username || ""), // Handle berbagai case
-            email: row.Email || row.email || null,
-            password: String(row.Password || row.password || "12345"), // Default password
+            username: String(
+              row.Username || row.username || row.NPM || row.npm || "",
+            ).trim(),
+            email: String(row.Email || row.email || "").trim(),
+            password: String(row.Password || row.password || "12345"),
           }))
-          .filter((user) => user.username !== ""); // Hapus baris kosong
+          .filter((user) => user.username !== "");
 
-        // Konfirmasi sebelum upload
+        if (formattedData.length === 0) {
+          toast.error("Tidak ada data valid yang ditemukan!");
+          return;
+        }
+
         if (
           !window.confirm(
             `Ditemukan ${formattedData.length} data. Lanjut import?`,
@@ -124,24 +126,22 @@ export default function DaftarPemilih() {
         )
           return;
 
-        // Kirim ke Backend
         setLoading(true);
-        await userService.importUsers(formattedData);
+        await userServices.importUsers(formattedData);
 
         toast.success(`Berhasil mengimport ${formattedData.length} pemilih!`);
-        fetchUsers(); // Refresh tabel
+        fetchAllUsers();
       } catch (error) {
-        console.error(error);
-        toast.error("Gagal membaca file Excel. Pastikan format benar.");
+        console.error("Error detail:", error);
+        toast.error(`Gagal membaca file: ${error.message}`);
       } finally {
         setLoading(false);
-        if (fileInputRef.current) fileInputRef.current.value = ""; // Reset input
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
     };
 
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file); // ← UBAH INI JUGA
   };
-
   const handleDeleteAll = async () => {
     // Safety Check 1
     if (

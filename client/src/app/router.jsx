@@ -21,16 +21,26 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // ✅ Route untuk voting (tidak perlu cek voting)
   {
     element: <ProtectedRoute allowedRoles={["user"]} />,
     children: [
       {
         path: "/",
         element: <MainLayout />,
-        children: [
-          { path: "votes", element: <Voting /> },
-          { path: "results", element: <Result /> },
-        ],
+        children: [{ path: "votes", element: <Voting /> }],
+      },
+    ],
+  },
+
+  // ✅ Route untuk results (WAJIB sudah voting)
+  {
+    element: <ProtectedRoute allowedRoles={["user"]} requireVoting={true} />,
+    children: [
+      {
+        path: "/",
+        element: <MainLayout />,
+        children: [{ path: "results", element: <Result /> }],
       },
     ],
   },
