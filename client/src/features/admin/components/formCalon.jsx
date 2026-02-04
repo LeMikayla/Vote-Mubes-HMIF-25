@@ -31,13 +31,11 @@ export default function FormCalon({ calon, onBack }) {
   const handleFoto = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // ✅ Validate file type
       if (!file.type.startsWith("image/")) {
         toast.error("File harus berupa gambar!");
         return;
       }
 
-      // ✅ Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error("Ukuran file maksimal 5MB!");
         return;
@@ -85,7 +83,7 @@ export default function FormCalon({ calon, onBack }) {
     if (!form.foto) return null;
 
     if (typeof form.foto === "string") {
-      return `http://localhost:3000${form.foto}`;
+      return `${import.meta.env.VITE_STATIC_BASE_URL}${form.foto}`; // ✅ Langsung pakai env
     }
     return URL.createObjectURL(form.foto);
   };

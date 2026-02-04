@@ -28,7 +28,9 @@ export const router = createBrowserRouter([
       {
         path: "/",
         element: <MainLayout />,
-        children: [{ path: "votes", element: <Voting /> }],
+        children: [
+          { path: "votes", element: <Voting /> },
+        ],
       },
     ],
   },
@@ -40,7 +42,9 @@ export const router = createBrowserRouter([
       {
         path: "/",
         element: <MainLayout />,
-        children: [{ path: "results", element: <Result /> }],
+        children: [
+          { path: "results", element: <Result /> },
+        ],
       },
     ],
   },

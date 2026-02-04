@@ -13,7 +13,7 @@ export const userServices = {
 
   getUserByUsername: async (username) => {
     const response = await Api.get(`/users/search/${username}`);
-    return response.data;
+    return response.data.data;
   },
 
   deleteAllUsers: async () => {

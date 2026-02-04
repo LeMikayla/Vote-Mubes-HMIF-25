@@ -41,15 +41,9 @@ const ProtectedRoute = ({ allowedRoles = [], requireVoting = false }) => {
     return <Loader />;
   }
 
-  // ✅ Auth check - Redirect ke login dengan state showLoginWarning
+  // Auth check
   if (!token) {
-    return (
-      <Navigate
-        to="/login"
-        state={{ showLoginWarning: true, from: location }}
-        replace
-      />
-    );
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Role check
@@ -58,7 +52,7 @@ const ProtectedRoute = ({ allowedRoles = [], requireVoting = false }) => {
   }
 
   // ✅ Voting check (hanya untuk route yang requireVoting=true)
-  if (requireVoting && !user?.hasVoted) {
+  if (requireVoting && !hasVoted) {
     return <Navigate to="/votes" state={{ showWarning: true }} replace />;
   }
 

@@ -12,15 +12,15 @@ export default function AdminGrafik() {
       name: item.name,
       value: parseInt(item.total_votes, 10) || 0,
       xLabel: parseInt(item.total_votes, 10) || 0,
-      avatar:
-        item.image_url ||
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}`,
+      // ✅ Langsung pakai env variable
+      avatar: item.image_url
+        ? `${import.meta.env.VITE_STATIC_BASE_URL}${item.image_url}`
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}`,
     }));
   };
 
   const chartData = formatChartData(results);
 
-  // Show loader while loading
   if (loading) return <Loader />;
 
   return (
@@ -55,16 +55,18 @@ export default function AdminGrafik() {
         </div>
       </div>
 
-      {/* Show message if no data */}
       {chartData.length === 0 ? (
         <div className="flex justify-center items-center py-20 bg-gray-50 rounded-lg border border-dashed border-gray-200">
           <p className="text-gray-500">Belum ada data kandidat atau suara.</p>
         </div>
       ) : (
-        <div className="flex justify-center items-center py-10 bg-gray-50 rounded-lg" style={{
-        background:
-          "linear-gradient(135deg, #F0DEC1 0%, #F6E7D4 19%, #FAE1C8 63%, #F0CEB0 100%)",
-      }}>
+        <div
+          className="flex justify-center items-center py-10 bg-gray-50 rounded-lg"
+          style={{
+            background:
+              "linear-gradient(135deg, #F0DEC1 0%, #F6E7D4 19%, #FAE1C8 63%, #F0CEB0 100%)",
+          }}
+        >
           <ResultCard chartData={chartData} />
         </div>
       )}

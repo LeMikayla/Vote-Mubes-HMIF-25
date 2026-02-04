@@ -21,7 +21,7 @@ import { toast } from "sonner";
 
 function Voting() {
   const location = useLocation(); // ← TAMBAHKAN INI
-
+  
   const [candidates, setCandidates] = useState([]);
   const [deadline, setDeadline] = useState(null);
   const [loading, setLoading] = useState(true);

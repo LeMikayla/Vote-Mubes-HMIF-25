@@ -77,7 +77,7 @@ export default function DaftarCalon({ onTambah, onEdit }) {
               <img
                 src={
                   c.image_url
-                    ? `http://localhost:3000${c.image_url}`
+                    ? `${import.meta.env.VITE_STATIC_BASE_URL}${c.image_url}` // ✅ Langsung pakai env
                     : getUiAvatar(c.name)
                 }
                 alt={c.name}
