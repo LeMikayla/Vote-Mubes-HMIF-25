@@ -164,10 +164,10 @@ const AuthLayout = () => {
       {modal === "login-warning" && (
         <>
           <div
-            className="fixed inset-0 bg-black/30 backdrop-blur-[1px] z-[60]"
+            className="fixed inset-0 bg-black/30 backdrop-blur-[1px] z-60"
             onClick={() => setModal(null)}
           />
-          <div className="fixed inset-0 flex items-center justify-center z-[70]">
+          <div className="fixed inset-0 flex items-center justify-center z-70">
             <LoginWarningContent onCancel={() => setModal(null)} />
           </div>
         </>

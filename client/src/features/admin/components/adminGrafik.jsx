@@ -24,7 +24,13 @@ export default function AdminGrafik() {
   if (loading) return <Loader />;
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 min-h-125">
+    <div
+      className=" p-6 rounded-xl shadow-sm border border-gray-100 min-h-125"
+      style={{
+        background:
+          "linear-gradient(135deg, #F0DEC1 0%, #F6E7D4 19%, #FAE1C8 63%, #F0CEB0 100%)",
+      }}
+    >
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-800">
@@ -55,7 +61,10 @@ export default function AdminGrafik() {
           <p className="text-gray-500">Belum ada data kandidat atau suara.</p>
         </div>
       ) : (
-        <div className="flex justify-center items-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+        <div className="flex justify-center items-center py-10 bg-gray-50 rounded-lg" style={{
+        background:
+          "linear-gradient(135deg, #F0DEC1 0%, #F6E7D4 19%, #FAE1C8 63%, #F0CEB0 100%)",
+      }}>
           <ResultCard chartData={chartData} />
         </div>
       )}
