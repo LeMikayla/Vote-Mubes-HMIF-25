@@ -47,10 +47,10 @@ INSERT INTO election_settings (id, event_name, end_date, status)
 VALUES (1, 'Pemilihan Ketua HMIF 2025', NOW() + INTERVAL '1 day', 'active');
 
 -- A. Masukkan Kandidat
-INSERT INTO candidates (name, npm, vision, mission, image_url) VALUES
-('Satria Baja Hitam', '1234567890', 'Patroli Server Tiap Malam', 'orang yang jujur', 'img_satria.jpg'),
-('Naruto Uzumaki', '0987654321', 'Ramen Gratis', 'Kekuatan Kepribadian', 'img_naruto.jpg'),
-('Spongebob', '1122334455', 'Pelatihan Krabby Patty', 'Kepribadian yang Kekinian', 'img_spongebob.jpg');
+INSERT INTO candidates (name, npm, number, vision, mission, image_url) VALUES
+('Satria Baja Hitam', '1234567890', 1, 'Patroli Server Tiap Malam', 'orang yang jujur', 'img_satria.jpg'),
+('Naruto Uzumaki', '0987654321', 2, 'Ramen Gratis', 'Kekuatan Kepribadian', 'img_naruto.jpg'),
+('Spongebob', '1122334455', 3, 'Pelatihan Krabby Patty', 'Kepribadian yang Kekinian', 'img_spongebob.jpg');
 
 -- B. Masukkan Pemilih (Password: 12345)
 INSERT INTO voters (username, password, email, role, has_voted, voted_at) VALUES
@@ -61,6 +61,8 @@ INSERT INTO voters (username, password, email, role, has_voted, voted_at) VALUES
 -- C. Masukkan Suara Awal (Biar grafik gak kosong)
 -- Karena user 03 sudah milih, kita kasih 1 suara ke Naruto (ID 2)
 INSERT INTO votes (candidate_id) VALUES (2);
+
+ALTER TABLE candidates ADD COLUMN number INT UNIQUE;
 
 -- Akun Atmin cik
 INSERT INTO voters (username, password, role, has_voted) 

@@ -4,7 +4,7 @@ class CandidateController {
   static async getAllCandidates(req, res) {
     try {
       const result = await pool.query(
-        "SELECT id, npm, name, vision, mission, image_url FROM candidates ORDER BY id ASC",
+        "SELECT id, npm, name, number, vision, mission, image_url FROM candidates ORDER BY id ASC",
       );
 
       res.status(200).json({
@@ -25,7 +25,7 @@ class CandidateController {
     console.log("Body:", req.body);
     console.log("File:", req.file);
     // 🔥 Ambil 'npm' dari body request
-    const { npm, name, vision, mission } = req.body;
+    const { npm, name, number, vision, mission } = req.body;
     const image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
     try {
@@ -38,8 +38,8 @@ class CandidateController {
 
       const result = await pool.query(
         // 🔥 Tambahkan kolom npm di query INSERT
-        "INSERT INTO candidates (npm, name, vision, mission, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [npm, name, vision, mission, image_url],
+        "INSERT INTO candidates (npm, name, number, vision, mission, image_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [npm, name, number, vision, mission, image_url],
       );
 
       res.status(201).json({
@@ -60,7 +60,7 @@ class CandidateController {
 
   static async updateCandidate(req, res) {
     const { id } = req.params;
-    const { npm, name, vision, mission } = req.body;
+    const { npm, name, number, vision, mission } = req.body;
 
     try {
       // ✅ FIX: Get current candidate to keep old image if no new upload
@@ -82,8 +82,8 @@ class CandidateController {
         : current.rows[0].image_url;
 
       await pool.query(
-        "UPDATE candidates SET npm=$1, name=$2, vision=$3, mission=$4, image_url=$5 WHERE id=$6",
-        [npm, name, vision, mission, image_url, id],
+        "UPDATE candidates SET npm=$1, name=$2, number=$3, vision=$4, mission=$5, image_url=$6 WHERE id=$7",
+        [npm, name, number, vision, mission, image_url, id],
       );
 
       res.json({

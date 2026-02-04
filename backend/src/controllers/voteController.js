@@ -126,6 +126,7 @@ class VoteController {
       const candidatesOnly = results.map((item) => ({
         id: item.id,
         name: item.name,
+        number: item.number,
         vision: item.vision,
       }));
 

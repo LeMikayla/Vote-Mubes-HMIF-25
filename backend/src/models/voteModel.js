@@ -66,6 +66,7 @@ class VoteModel {
         SELECT 
           c.id,
           c.name,
+          c.number,
           c.vision,
           c.image_url,
           COUNT(v.id) as total_votes,
@@ -75,7 +76,7 @@ class VoteModel {
           ) as percentage
         FROM candidates c
         LEFT JOIN votes v ON c.id = v.candidate_id
-        GROUP BY c.id, c.name, c.vision, c.image_url
+        GROUP BY c.id, c.name, c.number, c.vision, c.image_url
         ORDER BY total_votes DESC
       `;
       const result = await pool.query(query);

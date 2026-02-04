@@ -6,7 +6,7 @@ class CandidateModel {
     try {
       // 🔥 Update Select Query
       const query =
-        "SELECT id, npm, name, vision, mission, image_url FROM candidates ORDER BY id";
+        "SELECT id, npm, name, number, vision, mission, image_url FROM candidates ORDER BY id";
       const result = await db.query(query);
       return result.rows;
     } catch (error) {
@@ -20,7 +20,7 @@ class CandidateModel {
     try {
       // 🔥 Update Select Query
       const query =
-        "SELECT id, npm, name, vision, mission, image_url FROM candidates WHERE id = $1";
+        "SELECT id, npm, name, number, vision, mission, image_url FROM candidates WHERE id = $1";
       const result = await db.query(query, [id]);
       return result.rows[0];
     } catch (error) {
@@ -29,15 +29,15 @@ class CandidateModel {
   }
 
   // Tambah kandidat
-  static async create(npm, name, vision, mission, image_url) {
+  static async create(npm, name, number, vision, mission, image_url) {
     try {
       // 🔥 Update Insert Query
       const query = `
-        INSERT INTO candidates (npm, name, vision, mission, image_url) 
-        VALUES ($1, $2, $3, $4, $5) 
+        INSERT INTO candidates (npm, name, number, vision, mission, image_url) 
+        VALUES ($1, $2, $3, $4, $5, $6) 
         RETURNING *
       `;
-      const values = [npm, name, vision, mission, image_url];
+      const values = [npm, name, number, vision, mission, image_url];
 
       const result = await db.query(query, values);
       return result.rows[0];

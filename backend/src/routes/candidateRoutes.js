@@ -5,6 +5,7 @@ const CandidateController = require("../controllers/candidateController");
 const verifyToken = require("../middleware/authMiddleware"); // Cek login
 const { verifyAdmin } = require("../middleware/roleMiddleware"); // Cek admin
 
+// Ambil Semua Kandidat
 router.get("/", CandidateController.getAllCandidates);
 
 // Tambah Kandidat
