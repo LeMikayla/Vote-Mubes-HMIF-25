@@ -57,7 +57,7 @@ class UserModel {
     return true;
   }
 
-  // Menerima array: [{username, email, password}, ...]
+  // Menerima array: [{username, password}, ...]
   static async bulkCreate(users) {
     const client = await pool.connect();
 
@@ -69,15 +69,15 @@ class UserModel {
         // Kita gunakan "ON CONFLICT DO NOTHING" biar kalau ada yg kembar, dia skip aja dan gak error.
 
         const query = `
-          INSERT INTO voters (username, email, password, role) 
-          VALUES ($1, $2, $3, 'user')
+          INSERT INTO voters (username, password, role) 
+          VALUES ($1, $2, 'user')
           ON CONFLICT (username) DO NOTHING
         `;
 
         // Pastikan password masuk (default 12345 jika kosong di excel)
         const password = user.password || "12345";
 
-        await client.query(query, [user.username, user.email, password]);
+        await client.query(query, [user.username, password]);
       }
 
       await client.query("COMMIT"); // Simpan Permanen
